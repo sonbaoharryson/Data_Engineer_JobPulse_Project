@@ -53,7 +53,7 @@ ENV CHROME_BIN=/usr/bin/google-chrome-stable \
 RUN if [ ! -x "$CHROME_BIN" ]; then echo "Chrome not found at $CHROME_BIN" >&2; exit 1; fi \
     && if [ ! -x "$CHROMEDRIVER_PATH" ]; then echo "Chromedriver not found at $CHROMEDRIVER_PATH" >&2; exit 1; fi
 
-COPY requirements.txt /requirements.txt
+COPY airflow/requirements.txt /requirements.txt
 
 USER airflow
 

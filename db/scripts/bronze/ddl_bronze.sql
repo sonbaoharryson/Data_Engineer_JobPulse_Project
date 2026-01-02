@@ -1,3 +1,5 @@
+\connect job_db_sm4x
+
 CREATE TABLE IF NOT EXISTS job_db_sm4x.bronze.topcv_data_job (
     id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
