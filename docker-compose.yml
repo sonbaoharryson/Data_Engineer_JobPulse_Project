@@ -1,113 +1,86 @@
-version: '3.9'
+version: "3.9"
+
+x-airflow-common: &airflow-common
+  image: botchatdiscord:latest
+  restart: unless-stopped
+  environment:
+    - LOAD_EX=n
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW_HOME=/opt/airflow
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
+    - DB_HOST=${DB_HOST}
+    - DB_USER=${DB_USER}
+    - DB_PASSWORD=${DB_PASSWORD}
+    - DB_NAME=${DB_AIRFLOW}
+    - AIRFLOW_WEBSERVER_SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/config/airflow.cfg:/opt/airflow/airflow.cfg
+    - ./airflow/scripts:/opt/airflow/scripts
+    - ./airflow/entrypoint/entrypoint_airflow.sh:/opt/airflow/entrypoint.sh
+    - ./.env:/opt/airflow/.env
+  networks:
+    - discord_network
 
 services:
-
   postgresql_db:
     image: postgres:latest
     container_name: postgresql_db
+    restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_DB=${DB_AIRFLOW}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_AIRFLOW}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - discord_network
 
- 
   webserver:
-    image: custom-airflow
+    <<: *airflow-common
     container_name: airflow-webserver
+    depends_on:
+      postgresql_db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
-    depends_on:
-      postgresql_db:
-        condition: service_healthy
+    entrypoint: ["/opt/airflow/entrypoint.sh"]
+    command: webserver
     logging:
       options:
         max-size: "10m"
         max-file: "3"
-    environment:
-      - LOAD_EX=n
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW_HOME=/opt/airflow
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-      - DB_HOST=${DB_HOST}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - AIRFLOW_WEBSERVER_SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/config/airflow.cfg:/opt/airflow/airflow.cfg
-      - ./airflow/scripts:/opt/airflow/scripts
-      - ./entrypoint/entrypoint_airflow.sh:/opt/airflow/entrypoint.sh
-      - ./.env:/opt/airflow/.env
-    entrypoint: ["/opt/airflow/entrypoint.sh"]
-    command: webserver
 
   airflow_scheduler:
-    image: custom-airflow
-    user: root
+    <<: *airflow-common
     container_name: airflow_scheduler
     depends_on:
       webserver:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob"]
       interval: 30s
-      timeout: 10s
+      timeout: 30s
       retries: 5
-      start_period: 30s
-    environment:
-      - LOAD_EX=n
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW_HOME=/opt/airflow
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-      - DB_HOST=${DB_HOST}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - AIRFLOW_WEBSERVER_SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
-    volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/config/airflow.cfg:/opt/airflow/airflow.cfg
-      - ./airflow/scripts:/opt/airflow/scripts
-      - ./.env:/opt/airflow/.env
-    command: bash -c "airflow db upgrade && airflow scheduler"
+    command: airflow scheduler
 
-  spark-master:
-    image: bitnami/spark:latest
-    container_name: spark-master
-    command: bin/spark-class org.apache.spark.deploy.master.Master
-    ports:
-      - "9090:8080"
-      - "7077:7077"
-  
-  spark-worker:
-    image: bitnami/spark:latest
-    container_name: spark-worker
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
-    depends_on:
-      - spark-master
-    environment:
-      SPARK_MODE: worker
-      SPARK_WORKER_CORES: 2
-      SPARK_WORKER_MEMORY: 1g
-      SPARK_MASTER_URL: spark://spark-master:7077
-
+networks:
+  discord_network:
+    driver: bridge
 
 volumes:
   postgres_data:
