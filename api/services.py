@@ -7,18 +7,10 @@ def get_topcv_jobs(db: Session) -> List[TopcvDataJobSchema]:
     """
     Retrieve all TopCV jobs from the database
     """
-    try:
-        jobs = db.query(TopcvDataJob).all()
-        return jobs
-    except Exception as e:
-        raise Exception(f"Failed to fetch TopCV jobs: {str(e)}")
+    return db.query(TopcvDataJob).all()
 
 def get_itviec_jobs(db: Session) -> List[ItviecDataJobSchema]:
     """
     Retrieve all ITViec jobs from the database
     """
-    try:
-        jobs = db.query(ItviecDataJob).all()
-        return jobs
-    except Exception as e:
-        raise Exception(f"Failed to fetch ITViec jobs: {str(e)}")
+    return db.query(ItviecDataJob).all()

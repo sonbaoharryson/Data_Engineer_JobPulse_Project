@@ -16,9 +16,13 @@ class Settings(BaseSettings):
     DB_PORT: str = os.getenv("DB_PORT", "")
     DB_NAME: str = os.getenv("DB_NAME", "")
     
-    # Rate limiting
-    RATE_LIMIT: int = 3  # 3 API calls per day
-    RATE_LIMIT_EXPIRES: int = 86400  # 1 day in seconds
-    
+    # Rate limiting disabled (unrestricted)
+    RATE_LIMIT: int = 0  # 0 = no limit
+    RATE_LIMIT_EXPIRES: int = 0  # no expiration
+
+    # API host/port (used when running `python app.py`)
+    API_HOST: str = "127.0.0.1"
+    API_PORT: int = 8000
+
     class Config:
         env_file = ".env"
