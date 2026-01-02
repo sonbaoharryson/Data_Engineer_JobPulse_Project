@@ -1,17 +1,11 @@
 import os
 import sys
-from pathlib import Path
+sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-# Add project root (airflow) to sys.path so `scripts` package can be imported
-project_root = Path(__file__).resolve().parents[3]
-project_root_str = str(project_root)
 
-if project_root_str not in sys.path:
-    sys.path.insert(1, project_root_str)
-print("sys.path[0:5] =", sys.path[0:5])
 
-from scripts.utils.db_conn import DBConnection
+from utils.db_conn import DBConnection
 
 try:
     db_conn = DBConnection()._create_db_connection()
