@@ -3,7 +3,7 @@ services:
   - type: web
     name: airflow-all-in-one
     env: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./airflow/Dockerfile
     dockerContext: .
     dockerCommand: /opt/airflow/start.sh
     envVars:
