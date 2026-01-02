@@ -1,0 +1,49 @@
+services:
+  # All-in-one Airflow Service (PostgreSQL + Webserver + Scheduler)
+  - type: web
+    name: airflow-all-in-one
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: /opt/airflow/start.sh
+    envVars:
+      - key: AIRFLOW_HOME
+        value: /opt/airflow
+      - key: AIRFLOW__CORE__EXECUTOR
+        value: LocalExecutor
+      - key: LOAD_EX
+        value: n
+      - key: AIRFLOW__CORE__LOAD_EXAMPLES
+        value: "False"
+      # PostgreSQL configuration (optional - defaults provided)
+      - key: DB_HOST
+        value: localhost
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_USER
+        value: airflow
+        sync: false
+      - key: DB_PASSWORD
+        value: airflow
+        sync: false
+      - key: DB_AIRFLOW
+        value: airflow
+        sync: false
+      - key: DB_JOB
+        sync: false
+      - key: AIRFLOW__WEBSERVER__SECRET_KEY
+        generateValue: true
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: DISCORD_CHANNEL_ID
+        sync: false
+      - key: ADMIN_USERNAME
+        value: airflow
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@example.com
+        sync: false
+    healthCheckPath: /health
+    numInstances: 1

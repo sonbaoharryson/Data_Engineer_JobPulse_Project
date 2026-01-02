@@ -1,13 +1,17 @@
 # Base image using the official Airflow image
-FROM apache/airflow:2.7.1-python3.11
+FROM apache/airflow:2.9.1-python3.11
 
 USER root
 
-# Install Chrome and dependencies
+# Install Chrome, PostgreSQL, supervisord and dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     unzip \
+    postgresql \
+    postgresql-contrib \
+    postgresql-client \
+    supervisor \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -59,6 +63,28 @@ USER airflow
 
 # Install Python dependencies
 RUN pip install -r /requirements.txt
+
+# Copy application files
+COPY --chown=airflow:root dags/ /opt/airflow/dags/
+COPY --chown=airflow:root scripts/ /opt/airflow/scripts/
+COPY --chown=airflow:root config/airflow.cfg /opt/airflow/airflow.cfg
+COPY --chown=airflow:root entrypoint/entrypoint_airflow.sh /opt/airflow/entrypoint.sh
+COPY --chown=airflow:root start.sh /opt/airflow/start.sh
+COPY --chown=root:root supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN chmod +x /opt/airflow/entrypoint.sh /opt/airflow/start.sh
+
+# Create PostgreSQL data directory and set permissions
+USER root
+RUN mkdir -p /var/lib/postgresql/data && \
+    chown -R postgres:postgres /var/lib/postgresql && \
+    chmod 700 /var/lib/postgresql/data
+
+# Create init script for PostgreSQL
+COPY --chown=root:root init-postgres.sh /usr/local/bin/init-postgres.sh
+RUN chmod +x /usr/local/bin/init-postgres.sh
+
+# Copy dbt project (if needed)
+# COPY --chown=airflow:root dbt/ /opt/airflow/dbt/
 
 # Set workdir
 WORKDIR /opt/airflow
