@@ -36,8 +36,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/01_create_db.sql
-      - ./db/init_schema.sql:/docker-entrypoint-initdb.d/02_create_schema.sql
-      - ./db/scripts/bronze/ddl_bronze.sql:/docker-entrypoint-initdb.d/ddl_bronze.sql
+      - ./db/init_schema_tables.sql:/docker-entrypoint-initdb.d/02_create_schema_tables.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_AIRFLOW}"]
       interval: 10s
