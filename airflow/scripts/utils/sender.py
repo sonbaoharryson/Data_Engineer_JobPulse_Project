@@ -13,7 +13,7 @@ def query_unposted_jobs(table_name: str):
     engine = DBConnection().engine
     query = text(f"""
         SELECT *
-        FROM job_db_sm4x.bronze.{table_name}
+        FROM job_db_sm4x.staging.{table_name}
         WHERE posted_to_discord = FALSE
     """)
     with engine.connect() as conn:
