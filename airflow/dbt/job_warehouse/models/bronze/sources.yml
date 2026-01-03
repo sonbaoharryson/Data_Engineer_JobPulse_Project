@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: job_raw
+    database: job_db_sm4x
+    schema: bronze
+
+    tables:
+      - name: topcv_data_job
+        description: "Raw job data crawled from TopCV"
+
+      - name: itviec_data_job
+        description: "Raw job data crawled from ITViec"

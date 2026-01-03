@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: sample_query_topcv
+    columns:
+      - name: url
+        tests:
+          - not_null
+          - unique
+
+  - name: sample_query_itviec
+    columns:
+      - name: url
+        tests:
+          - not_null

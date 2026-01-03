@@ -1,12 +1,11 @@
-
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'job_warehouse'
-version: '1.0.0'
+name: "job_warehouse"
+version: "1.0.0"
 
 # This setting configures which "profile" dbt uses for this project.
-profile: 'job_warehouse'
+profile: "job_warehouse"
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -18,10 +17,9 @@ seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
-clean-targets:         # directories to be removed by `dbt clean`
+clean-targets: # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
-
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
@@ -32,5 +30,22 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   job_warehouse:
     # Config indicated by + and applies to all files under models/example/
-    example:
+    # example:
+    #   +materialized: view
+
+    +database: job_db_sm4x
+
+    bronze:
+      +schema: bronze
       +materialized: view
+
+    silver:
+      +schema: silver
+      +materialized: incremental
+
+      staging:
+        +materialized: view
+
+    gold:
+      +schema: gold
+      +materialized: table
