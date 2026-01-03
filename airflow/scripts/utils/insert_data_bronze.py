@@ -12,7 +12,7 @@ def insert_itviec_jobs(jobs):
     #UpSert jobs into the database
     #Using ON CONFLICT to handle duplicates based on the URL
     query = text("""
-        INSERT INTO bronze.itviec_data_job (title, company, logo, url, location, mode, tags, descriptions, requirements, posted_to_discord)
+        INSERT INTO staging.itviec_data_job (title, company, logo, url, location, mode, tags, descriptions, requirements, posted_to_discord)
                 VALUES (:title, :company, :logo, :url, :location, :mode, :tags, :descriptions, :requirements, FALSE)
         ON CONFLICT (url) DO UPDATE SET
             title = EXCLUDED.title,
@@ -46,7 +46,7 @@ def insert_topcv_jobs(jobs):
         print("No TopCV jobs to insert")
 
     query = text("""
-        INSERT INTO bronze.topcv_data_job (title, company, logo, url, location, salary, descriptions, requirements, experience, education, type_of_work, posted_to_discord)
+        INSERT INTO staging.topcv_data_job (title, company, logo, url, location, salary, descriptions, requirements, experience, education, type_of_work, posted_to_discord)
                 VALUES (:title, :company, :logo, :url, :location, :salary, :descriptions, :requirements, :experience, :education, :type_of_work, FALSE)
         ON CONFLICT (url) DO UPDATE SET
             title = EXCLUDED.title,
