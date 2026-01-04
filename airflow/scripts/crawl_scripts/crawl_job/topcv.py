@@ -4,8 +4,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from typing import List, Dict
+from typing import List, Dict, Optional
 import logging
+from .helpers.extracting_info import _safe_text, _safe_attr, _safe_find
 
 # Configure logging
 logging.basicConfig(
@@ -44,137 +45,178 @@ class TopCVScraper:
         chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36")
         return chrome_options
     
+    def _init_driver(self) -> webdriver.Chrome:
+        """Initialize Chrome WebDriver."""
+        return webdriver.Chrome(
+            service=Service(self._driver_path),
+            options=self._get_chrome_options()
+        )
+
     def _extract_job_info(self, job) -> tuple:
         """Extract basic job information from job listing."""
-        title = job.find('h3').text.strip().split('?ta_source')[0]
-        company = job.find('a', class_='company').text.strip()
+        title = _safe_text(_safe_find(job, 'h3')).strip().split('?ta_source')[0]
+        company = _safe_text(_safe_find(job, 'a', class_='company')).strip()
         
         img_tag = job.find('img')
         logo = img_tag.get('src') or img_tag.get('data-src', '')
         logo = logo.replace('https://cdn-new.topcv.vn/unsafe/150x/', '')
-        job_url = job.find('a')['href'].strip()
-        location = job.find('label', class_='address').text.strip()
-        salary = job.find('label', class_='title-salary').text.strip()
         
-        return title, company, logo, job_url, location, salary
+        job_url = _safe_attr(_safe_find(job, 'a'), 'href').strip()
+        location = _safe_text(_safe_find(job.find('label', class_='address'), 'span'))
+        salary = _safe_text(_safe_find(job.find('label', class_='title-salary'), 'span')) or _safe_text(_safe_find(job.find('label', class_='salary'), 'span'))
+        exp = _safe_text(_safe_find(job.find('label', class_='exp'), 'span')).strip()
+        return title, company, logo, job_url, location, salary, exp
     
+
     def _parse_brand_job(self, soup) -> tuple:
-        """Parse job details from brand page."""
-        descriptions = requirements = exp = edu = type_of_work = ''
-        divs = soup.find_all('div', class_='box-info') or soup.find_all('div', class_='premium-job-description__box')
-        
+        descriptions = requirements = edu = type_of_work = ''
+
+        divs = (
+            soup.find_all('div', class_='box-info')
+            or soup.find_all('div', class_='premium-job-description')
+        )
+
         for div in divs:
-            h2_tag = div.find('h2', class_="title")
+            h2_tag = (
+                _safe_find(div, 'h2', class_="premium-job-description__box--title")
+                or _safe_find(div, 'h2', class_="title")
+            )
             if not h2_tag:
                 continue
-            
-            title_text = h2_tag.text.strip()
-            content = div.find('div', class_='content-tab')
+
+            title_text = _safe_text(h2_tag)
+            content = (
+                _safe_find(div, 'div', class_='premium-job-description__box--content')
+                or _safe_find(div, 'div', class_='content-tab')
+            )
+
             if "Mô tả công việc" in title_text:
-                descriptions = content.text.strip() if content else ''
+                descriptions = _safe_text(content) if content else ''
             elif "Yêu cầu ứng viên" in title_text:
-                requirements = content.text.strip() if content else ''
+                requirements = _safe_text(content) if content else ''
             elif "Thông tin" in title_text:
                 for item in div.find_all('div', class_='box-item'):
                     strong = item.find('strong')
                     span = item.find('span')
                     if strong and span:
-                        label = strong.text.strip()
-                        value = span.text.strip()
-                        if label == "Kinh nghiệm":
-                            exp = value
-                        elif label == "Học vấn":
+                        label = _safe_text(strong)
+                        value = _safe_text(span)
+                        if label == "Học vấn":
                             edu = value
                         elif label == "Hình thức làm việc":
                             type_of_work = value
-        return descriptions, requirements, exp, edu, type_of_work
+
+        if not edu or not type_of_work:
+            for div in soup.find_all('div', class_='premium-job-general-information__content'):
+                title_div = _safe_find(div, 'div', 'general-information-data__label')
+                value_div = _safe_find(div, 'div', 'general-information-data__value')
+                if title_div and value_div:
+                    label = _safe_text(title_div)
+                    value = _safe_text(value_div)
+                    if label == "Hình thức làm việc":
+                        type_of_work = value
+                    elif label == "Học vấn":
+                        edu = value
+        return descriptions, requirements, edu, type_of_work
+
     
     def _parse_job_detail(self, soup) -> tuple:
         """Parse job details from standard job page."""
-        descriptions = requirements = exp = edu = type_of_work = ''
+        descriptions = requirements = edu = type_of_work = ''
         
         for div in soup.find_all('div', class_='job-description__item'):
-            h3_tag = div.find("h3")
-            content = div.find('div', class_='job-description__item--content')
+            h3_tag = _safe_find(div, "h3")
+            content = _safe_find(div, 'div', 'job-description__item--content')
             if h3_tag and content:
-                title = h3_tag.get_text(strip=True)
+                title = _safe_text(h3_tag)
                 if title == "Mô tả công việc":
-                    descriptions = content.text.strip()
+                    descriptions = _safe_text(content)
                 elif title == "Yêu cầu ứng viên":
-                    requirements = content.text.strip()
-        
-        exp_divs = soup.find_all('div', class_='job-detail__info--section-content-value')
-        if exp_divs:
-            exp = exp_divs[-1].text.strip()
+                    requirements = _safe_text(content)
         
         for div in soup.find_all('div', class_='box-general-group'):
-            title_div = div.find('div', class_='box-general-group-info-title')
-            value_div = div.find('div', class_='box-general-group-info-value')
+            title_div = _safe_find(div, 'div', 'box-general-group-info-title')
+            value_div = _safe_find(div, 'div', 'box-general-group-info-value')
             if title_div and value_div:
-                label = title_div.text.strip()
-                value = value_div.text.strip()
+                label = _safe_text(title_div)
+                value = _safe_text(value_div)
                 if label == "Hình thức làm việc":
                     type_of_work = value
                 elif label == "Học vấn":
                     edu = value
         
-        return descriptions, requirements, exp, edu, type_of_work
+        return descriptions, requirements, edu, type_of_work
     
     def scrape_jobs(self, url: str) -> List[Dict[str, str]]:
-        """Main method to scrape jobs from TopCV."""
-        chrome_options = self._get_chrome_options()
-        
+        """Main method to scrape jobs from TopCV."""        
         # Initialize driver for listing page
-        driver = webdriver.Chrome(service=Service(self._driver_path), options=chrome_options)
+        driver = self._init_driver()
+        
         driver.get(url)
-        time.sleep(5)
+        time.sleep(3)
         
         page_source = driver.page_source
         soup = BeautifulSoup(page_source, "html.parser")
-        time.sleep(5)
+        time.sleep(3)
         jobs = soup.find_all('div', class_='job-item-search-result')
         driver.quit()
         
         logger.info(f"Found {len(jobs)} jobs")
         
-        job_data = []
+        job_data: List[Dict[str, Optional[str]]] = []
         
         for idx, job in enumerate(jobs, 1):
             try:
                 logger.info(f"Processing job {idx}/{len(jobs)}")
                 
-                title, company, logo, job_url, location, salary = self._extract_job_info(job)
-                
+                data = {
+                    'title': None,
+                    'company': None,
+                    'logo': None,
+                    'url': None,
+                    'location': None,
+                    'salary': None,
+                    'descriptions': None,
+                    'requirements': None,
+                    'experience': None,
+                    'education': None,
+                    'type_of_work': None
+                }
+
+                title, company, logo, job_url, location, salary, exp = self._extract_job_info(job)
+                data['title'] = title
+                data['company'] = company
+                data['logo'] = logo
+                data['url'] = job_url
+                data['location'] = location
+                data['salary'] = salary
+                data['experience'] = exp
                 # Create new driver for each job detail to avoid bot detection
-                driver = webdriver.Chrome(service=Service(self._driver_path), options=chrome_options)
-                driver.get(job_url)
-                job_soup = BeautifulSoup(driver.page_source, "html.parser")
-                time.sleep(5)
-                driver.quit()
-                
-                if job_url.startswith('https://www.topcv.vn/brand'):
-                    descriptions, requirements, exp, edu, type_of_work = self._parse_brand_job(job_soup)
-                elif job_url.startswith('https://www.topcv.vn/viec-lam'):
-                    descriptions, requirements, exp, edu, type_of_work = self._parse_job_detail(job_soup)
-                else:
-                    descriptions = requirements = exp = edu = type_of_work = ''
-                
-                job_data.append({
-                    'title': title,
-                    'company': company,
-                    'logo': logo,
-                    'url': job_url,
-                    'location': location,
-                    'salary': salary,
-                    'descriptions': descriptions,
-                    'requirements': requirements,
-                    'experience': exp,
-                    'education': edu,
-                    'type_of_work': type_of_work
-                })
+                if job_url:
+                    try:
+                        detail_driver = self._init_driver()
+                        detail_driver.get(job_url)
+                        time.sleep(3)
+                        job_soup = BeautifulSoup(detail_driver.page_source, "html.parser")
+                        
+                        if job_url.startswith('https://www.topcv.vn/brand'):
+                            descriptions, requirements, edu, type_of_work = self._parse_brand_job(job_soup)
+                        elif job_url.startswith('https://www.topcv.vn/viec-lam'):
+                            descriptions, requirements, edu, type_of_work = self._parse_job_detail(job_soup)
+                        else:
+                            descriptions = requirements = edu = type_of_work = ''
+                        
+                        data['descriptions'] = descriptions
+                        data['requirements'] = requirements
+                        data['education'] = edu
+                        data['type_of_work'] = type_of_work
+                    finally:
+                        detail_driver.quit()
+
             except Exception as e:
                 logger.error(f"Error processing job, skipping... {e}")
-                continue
+            
+            job_data.append(data)
         
         logger.info(f"Scraping completed. Total jobs scraped: {len(job_data)}")
         return job_data

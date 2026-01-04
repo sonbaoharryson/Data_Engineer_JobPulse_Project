@@ -1,143 +1,153 @@
 import time
+import logging
+from typing import List, Dict, Optional
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+from .helpers.extracting_info import _safe_text, _safe_attr, _safe_find
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-from typing import List, Dict
-import logging
 
-# Configure logging
+# ---------------- LOGGING ---------------- #
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),  # Output to console
-        # Uncomment the line below to also save logs to a file
-        # logging.FileHandler('scraper.log', encoding='utf-8')
-    ]
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 class ITViecScraper:
     def __init__(self, headless: bool = True):
-        """
-        Initialize the scraper with configurable options.
-        
-        Args:
-            headless: Run Chrome in headless mode
-        """
         self.headless = headless
-        # Cache driver path on initialization
         logger.info("Initializing ChromeDriver...")
         self._driver_path = ChromeDriverManager().install()
-    
-    def _get_chrome_options(self) -> Options:
-        """Configure Chrome options for optimal performance."""
-        chrome_options = Options()
-        if self.headless:
-            chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36")
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        chrome_options.add_experimental_option('useAutomationExtension', False)
-        return chrome_options
-    
-    def _init_driver(self) -> webdriver.Chrome:
-        """Initialize a new Chrome driver instance."""
-        options = self._get_chrome_options()
-        return webdriver.Chrome(
-            service=Service(self._driver_path), 
-            options=options
-        )
-    
-    def scrape_jobs(self, url: str) -> List[Dict[str, str]]:
-        """Main method to scrape jobs from ITViec."""
-        chrome_options = self._get_chrome_options()
-        
-        # Initialize driver for listing page
-        driver = webdriver.Chrome(service=Service(self._driver_path), options=chrome_options)
-        driver.get(url)
-        time.sleep(5)
-        
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        jobs = soup.find_all('div', class_='ipy-2')
-        driver.close()
-        
-        logger.info(f"Found {len(jobs)} jobs")
-        
-        job_data = []
-        
-        for idx, job in enumerate(jobs, 1):
-            try:
-                logger.info(f"Processing job {idx}/{len(jobs)}")
-                
-                job_url = job.find('h3', class_='imt-3 text-break')['data-url'].split('?lab_feature=')[0]
-                title = job.find('h3').text.strip()
-                
-                company = job.find('div', class_='imy-3 d-flex align-items-center').span.text.strip()
-                logo = job.find('div', class_='imy-3 d-flex align-items-center').a.img['data-src']
-                mode = job.find('div', class_='text-rich-grey flex-shrink-0').text.strip()
-                location = job.find('div', class_='text-rich-grey text-truncate text-nowrap stretched-link position-relative')['title']
-                
-                tags = ', '.join([f'{a.text.strip()}' for a in job.find('div', class_='imt-4 imb-3 d-flex igap-1').find_all('a')])
-                
-                # Create new driver for each job detail to avoid bot detection
-                driver = webdriver.Chrome(service=Service(self._driver_path), options=chrome_options)
-                driver.get(job_url)
-                time.sleep(5)
-                soup = BeautifulSoup(driver.page_source, "html.parser")
-                driver.close()
-                
-                try:
-                    job_description = soup.find_all('div', class_='imy-5 paragraph')[0]
-                    job_requirement = soup.find_all('div', class_='imy-5 paragraph')[1]
-                except Exception:
-                    logger.warning(f"Could not get job description or requirement {job_url}")
-                
-                try:
-                    descriptions = ' '.join([
-                        f"{p.get_text(strip=True)}"
-                        for p in job_description.find_all("li")
-                    ]) or ' '.join([
-                        f"{p.get_text(strip=True)}"
-                        for p in job_description.find_all("p")
-                    ])
-                except Exception:
-                    logger.warning(f"Could not get job description details {job_url}")
 
-                try:
-                    requirements = ' '.join([
-                        f"{p.get_text(strip=True)}"
-                        for p in job_requirement.find_all("li")
-                    ]) or ' '.join([
-                        f"{p.get_text(strip=True)}"
-                        for p in job_requirement.find_all("p")
-                    ])
-                except Exception:
-                    logger.warning(f"Could not get job requirements details {job_url}")
-          
-                job_data.append({
-                    'title': title,
-                    'company': company,
-                    'logo': logo,
-                    'url': job_url,
-                    'location': location,
-                    'mode': mode,
-                    'tags': tags,
-                    'descriptions': descriptions,
-                    'requirements': requirements
-                })
+    # ---------------- DRIVER SETUP ---------------- #
+    def _get_chrome_options(self) -> Options:
+        options = Options()
+        if self.headless:
+            options.add_argument("--headless=new")
+
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+        )
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+        return options
+
+    def _init_driver(self) -> webdriver.Chrome:
+        return webdriver.Chrome(
+            service=Service(self._driver_path),
+            options=self._get_chrome_options()
+        )
+
+    def _extract_text(self, section) -> Optional[str]:
+        try:
+            items = section.find_all("li") or section.find_all("p")
+            texts = [i.get_text(strip=True) for i in items if i.get_text(strip=True)]
+            return " ".join(texts) if texts else None
+        except Exception:
+            return None
+
+    def scrape_jobs(self, url: str) -> List[Dict[str, Optional[str]]]:
+        driver = self._init_driver()
+        driver.get(url)
+        time.sleep(3)
+
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        jobs = soup.find_all("div", class_="ipy-2")
+        driver.quit()
+
+        logger.info(f"Found {len(jobs)} jobs")
+        job_data: List[Dict[str, Optional[str]]] = []
+
+        for idx, job in enumerate(jobs, 1):
+            logger.info(f"Processing job {idx}/{len(jobs)}")
+
+            data = {
+                "title": None,
+                "company": None,
+                "logo": None,
+                "url": None,
+                "location": None,
+                "mode": None,
+                "tags": None,
+                "descriptions": None,
+                "requirements": None
+            }
+
+            try:
+                title_el = _safe_find(job, "h3")
+                data["title"] = _safe_text(title_el)
+
+                url_el = _safe_find(job, "h3", class_="imt-3 text-break")
+                raw_url = _safe_attr(url_el, "data-url")
+                data["url"] = raw_url.split("?lab_feature=")[0] if raw_url else None
+
+                company_el = _safe_find(
+                    job, "div", class_="imy-3 d-flex align-items-center"
+                )
+                data["company"] = _safe_text(
+                    _safe_find(company_el, "span")
+                )
+
+                data["logo"] = _safe_attr(
+                    _safe_find(company_el, "img"), "data-src"
+                )
+
+                data["mode"] = _safe_text(
+                    _safe_find(job, "div", class_="text-rich-grey flex-shrink-0")
+                )
+
+                location_el = _safe_find(
+                    job,
+                    "div",
+                    class_="text-rich-grey text-truncate text-nowrap stretched-link position-relative"
+                )
+                data["location"] = _safe_attr(location_el, "title")
+
+                tag_container = _safe_find(
+                    job, "div", class_="imt-4 imb-3 d-flex igap-1"
+                )
+                if tag_container:
+                    tags = [
+                        _safe_text(a)
+                        for a in tag_container.find_all("a")
+                        if _safe_text(a)
+                    ]
+                    data["tags"] = ", ".join(tags) if tags else None
+
+                # -------- DETAIL PAGE (NEW DRIVER) -------- #
+                if data["url"]:
+                    detail_driver = self._init_driver()
+                    try:
+                        detail_driver.get(data["url"])
+                        time.sleep(3)
+                        detail_soup = BeautifulSoup(
+                            detail_driver.page_source, "html.parser"
+                        )
+
+                        sections = detail_soup.find_all(
+                            "div", class_="imy-5 paragraph"
+                        )
+
+                        if len(sections) > 0:
+                            data["descriptions"] = self._extract_text(sections[0])
+                        if len(sections) > 1:
+                            data["requirements"] = self._extract_text(sections[1])
+
+                    finally:
+                        detail_driver.quit()
+
             except Exception as e:
-                logger.error(f"Error processing job, skipping... {e}")
-                continue
-        
+                logger.error(f"Job skipped due to unexpected error: {e}")
+
+            job_data.append(data)
+
         logger.info(f"Scraping completed. Total jobs scraped: {len(job_data)}")
         return job_data
