@@ -31,7 +31,7 @@ def mark_jobs_as_posted(table_name: str, job_urls: list):
 
     engine = DBConnection().engine
     query = text(f"""
-        UPDATE job_db_sm4x.bronze.{table_name}
+        UPDATE job_db_sm4x.staging.{table_name}
         SET posted_to_discord = TRUE
         WHERE url = ANY(:urls)
     """)
