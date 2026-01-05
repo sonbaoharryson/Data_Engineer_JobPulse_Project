@@ -4,7 +4,7 @@ sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from airflow.decorators import dag, task
 from datetime import datetime, timedelta
 from scripts.crawl_scripts.crawl_job.crawler import Crawler
-from scripts.utils.insert_data_bronze import insert_itviec_jobs
+from scripts.utils.insert_data_staging import insert_itviec_jobs
 from scripts.utils.load_crawl_source import load_crawl_sources
 from scripts.utils.sender import query_unposted_jobs, mark_jobs_as_posted, send_job_alerts
 import logging
