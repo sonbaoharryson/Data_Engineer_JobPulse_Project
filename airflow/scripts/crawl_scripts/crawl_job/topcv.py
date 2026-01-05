@@ -216,7 +216,8 @@ class TopCVScraper:
             except Exception as e:
                 logger.error(f"Error processing job, skipping... {e}")
             
-            job_data.append(data)
+            if data['url']:
+                job_data.append(data)
         
         logger.info(f"Scraping completed. Total jobs scraped: {len(job_data)}")
         return job_data
