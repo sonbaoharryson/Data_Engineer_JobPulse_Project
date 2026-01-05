@@ -7,17 +7,17 @@ CREATE SCHEMA IF NOT EXISTS staging;
 -- =========================
 CREATE TABLE IF NOT EXISTS job_db_sm4x.staging.topcv_data_job (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    company VARCHAR(150) NOT NULL,
-    logo TEXT,
-    url TEXT UNIQUE,
-    location VARCHAR(100),
-    salary VARCHAR(50),
+    title VARCHAR(200),
+    company TEXT,
+    logo_url TEXT,
+    url TEXT UNIQUE NOT NULL,
+    working_location VARCHAR(100),
+    salary VARCHAR(100),
     descriptions TEXT,
     requirements TEXT,
-    experience VARCHAR(100),
-    education VARCHAR(100),
-    type_of_work VARCHAR(50),
+    experiences TEXT,
+    level_of_education VARCHAR(100),
+    work_model VARCHAR(50),
     posted_to_discord BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -27,15 +27,15 @@ CREATE TABLE IF NOT EXISTS job_db_sm4x.staging.topcv_data_job (
 -- =========================
 CREATE TABLE IF NOT EXISTS job_db_sm4x.staging.itviec_data_job (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    company VARCHAR(150) NOT NULL,
-    logo TEXT,
-    url TEXT UNIQUE,
-    location VARCHAR(100),
-    mode VARCHAR(50),
-    tags VARCHAR(200),
+    title VARCHAR(200),
+    company TEXT,
+    logo_url TEXT,
+    url TEXT UNIQUE NOT NULL,
+    working_location VARCHAR(100),
+    work_model VARCHAR(50),
+    tags TEXT,
     descriptions TEXT,
-    requirements TEXT,
+    requirements_and_experiences TEXT,
     posted_to_discord BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
