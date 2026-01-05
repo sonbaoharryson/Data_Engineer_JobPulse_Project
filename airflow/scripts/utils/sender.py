@@ -11,8 +11,9 @@ if not logger.handlers:
 
 def query_unposted_jobs(table_name: str):
     engine = DBConnection().engine
+    salary_col = "salary" if table_name == 'topcv_data_job' else "'Sign-in ITViec for details.'"
     query = text(f"""
-        SELECT *
+        SELECT title, url, logo_url as logo, working_location as location, {salary_col} as salary
         FROM job_db_sm4x.staging.{table_name}
         WHERE posted_to_discord = FALSE
     """)
