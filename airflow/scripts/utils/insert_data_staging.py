@@ -12,17 +12,17 @@ def insert_itviec_jobs(jobs):
     #UpSert jobs into the database
     #Using ON CONFLICT to handle duplicates based on the URL
     query = text("""
-        INSERT INTO staging.itviec_data_job (title, company, logo, url, location, mode, tags, descriptions, requirements, posted_to_discord)
+        INSERT INTO staging.itviec_data_job (title, company, logo_url, url, working_location, work_model, tags, descriptions, requirements_and_experiences, posted_to_discord)
                 VALUES (:title, :company, :logo, :url, :location, :mode, :tags, :descriptions, :requirements, FALSE)
         ON CONFLICT (url) DO UPDATE SET
             title = EXCLUDED.title,
             company = EXCLUDED.company,
-            logo = EXCLUDED.logo,
-            location = EXCLUDED.location,
-            mode = EXCLUDED.mode,
+            logo_url = EXCLUDED.logo_url,
+            working_location = EXCLUDED.working_location,
+            work_model = EXCLUDED.work_model,
             tags = EXCLUDED.tags,
             descriptions = EXCLUDED.descriptions,
-            requirements = EXCLUDED.requirements,
+            requirements_and_experiences = EXCLUDED.requirements_and_experiences,
             posted_to_discord = FALSE
         """)
 
@@ -46,19 +46,19 @@ def insert_topcv_jobs(jobs):
         print("No TopCV jobs to insert")
 
     query = text("""
-        INSERT INTO staging.topcv_data_job (title, company, logo, url, location, salary, descriptions, requirements, experience, education, type_of_work, posted_to_discord)
+        INSERT INTO staging.topcv_data_job (title, company, logo_url, url, working_location, salary, descriptions, requirements, experiences, level_of_education, work_model, posted_to_discord)
                 VALUES (:title, :company, :logo, :url, :location, :salary, :descriptions, :requirements, :experience, :education, :type_of_work, FALSE)
         ON CONFLICT (url) DO UPDATE SET
             title = EXCLUDED.title,
             company = EXCLUDED.company,
-            logo = EXCLUDED.logo,
-            location = EXCLUDED.location,
+            logo_url = EXCLUDED.logo_url,
+            working_location = EXCLUDED.working_location,
             salary = EXCLUDED.salary,
             descriptions = EXCLUDED.descriptions,
             requirements = EXCLUDED.requirements,
-            experience = EXCLUDED.experience,
-            education = EXCLUDED.education,
-            type_of_work = EXCLUDED.type_of_work,
+            experiences = EXCLUDED.experiences,
+            level_of_education = EXCLUDED.level_of_education,
+            work_model = EXCLUDED.work_model,
             posted_to_discord = FALSE
         """)
 
