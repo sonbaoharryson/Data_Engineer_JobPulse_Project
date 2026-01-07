@@ -12,8 +12,8 @@ def insert_itviec_jobs(jobs):
     #UpSert jobs into the database
     #Using ON CONFLICT to handle duplicates based on the URL
     query = text("""
-        INSERT INTO staging.itviec_data_job (title, company, logo_url, url, working_location, work_model, tags, descriptions, requirements_and_experiences, posted_to_discord)
-                VALUES (:title, :company, :logo, :url, :location, :mode, :tags, :descriptions, :requirements, FALSE)
+        INSERT INTO staging.itviec_data_job (title, company, logo_url, url, working_location, work_model, tags, descriptions, requirements_and_experiences)
+                VALUES (:title, :company, :logo, :url, :location, :mode, :tags, :descriptions, :requirements)
         ON CONFLICT (url) DO UPDATE SET
             title = EXCLUDED.title,
             company = EXCLUDED.company,
@@ -22,8 +22,7 @@ def insert_itviec_jobs(jobs):
             work_model = EXCLUDED.work_model,
             tags = EXCLUDED.tags,
             descriptions = EXCLUDED.descriptions,
-            requirements_and_experiences = EXCLUDED.requirements_and_experiences,
-            posted_to_discord = FALSE
+            requirements_and_experiences = EXCLUDED.requirements_and_experiences
         """)
 
     try:
@@ -46,8 +45,8 @@ def insert_topcv_jobs(jobs):
         print("No TopCV jobs to insert")
 
     query = text("""
-        INSERT INTO staging.topcv_data_job (title, company, logo_url, url, working_location, salary, descriptions, requirements, experiences, level_of_education, work_model, posted_to_discord)
-                VALUES (:title, :company, :logo, :url, :location, :salary, :descriptions, :requirements, :experience, :education, :type_of_work, FALSE)
+        INSERT INTO staging.topcv_data_job (title, company, logo_url, url, working_location, salary, descriptions, requirements, experiences, level_of_education, work_model)
+                VALUES (:title, :company, :logo, :url, :location, :salary, :descriptions, :requirements, :experience, :education, :type_of_work)
         ON CONFLICT (url) DO UPDATE SET
             title = EXCLUDED.title,
             company = EXCLUDED.company,
@@ -58,8 +57,7 @@ def insert_topcv_jobs(jobs):
             requirements = EXCLUDED.requirements,
             experiences = EXCLUDED.experiences,
             level_of_education = EXCLUDED.level_of_education,
-            work_model = EXCLUDED.work_model,
-            posted_to_discord = FALSE
+            work_model = EXCLUDED.work_model
         """)
 
     try:
