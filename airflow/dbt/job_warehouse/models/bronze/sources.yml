@@ -11,3 +11,12 @@ sources:
 
       - name: itviec_data_job
         description: "Raw job data crawled from ITViec"
+
+  - name: bronze_layer
+    database: job_db_sm4x
+    schema: job_wh_bronze
+
+    tables:
+      - name: bronze_ingest_itviec
+
+      - name: bronze_ingest_topcv
