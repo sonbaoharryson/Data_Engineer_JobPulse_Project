@@ -48,8 +48,8 @@ class ITViecScraper:
 
     def _extract_text(self, section) -> Optional[str]:
         try:
-            items = section.find_all("li") or section.find_all("p")
-            texts = [i.get_text(strip=True) for i in items if i.get_text(strip=True)]
+            items = section.find_all(["p", "li"], recursive=True)
+            texts = [i.get_text() for i in items if i.get_text(strip=True)]
             return " ".join(texts) if texts else None
         except Exception:
             return None
