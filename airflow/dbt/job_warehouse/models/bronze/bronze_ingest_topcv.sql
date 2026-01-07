@@ -11,7 +11,7 @@ SELECT
     {{ lower_and_trim('descriptions') }} AS descriptions,
     {{ lower_and_trim('requirements') }} AS requirements,
     {{ lower_and_trim('experiences') }} AS experiences,
-    {{ upper_and_trim('level_of_education') }} AS level_of_education,
+    {{ initcap_and_trim('level_of_education') }} AS level_of_education,
     {{ initcap_and_trim('work_model') }} AS work_model,
     posted_to_discord,
     created_at
