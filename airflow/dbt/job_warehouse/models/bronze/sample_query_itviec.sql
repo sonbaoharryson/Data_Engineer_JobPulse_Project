@@ -2,7 +2,7 @@ select
     id,
     title,
     company,
-    location,
+    working_location,
     url,
     created_at
 from {{ source('job_raw', 'itviec_data_job') }}

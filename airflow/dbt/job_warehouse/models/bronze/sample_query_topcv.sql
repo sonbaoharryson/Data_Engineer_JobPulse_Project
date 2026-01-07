@@ -2,7 +2,7 @@ select
     id,
     title,
     company,
-    location,
+    working_location,
     salary,
     url,
     created_at
