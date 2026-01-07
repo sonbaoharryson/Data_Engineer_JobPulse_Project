@@ -1,15 +1,30 @@
 version: 2
 
 models:
-  - name: sample_query_topcv
+  - name: bronze_ingest_topcv
     columns:
       - name: url
         tests:
           - not_null
           - unique
+      - name: descriptions
+        tests:
+          - not_null
+      - name: requirements
+        tests:
+          - not_null
+      - name: experiences
+        tests:
+          - not_null
 
-  - name: sample_query_itviec
+  - name: bronze_ingest_itviec
     columns:
       - name: url
+        tests:
+          - not_null
+      - name: descriptions
+        tests:
+          - not_null
+      - name: requirements_and_experiences
         tests:
           - not_null
