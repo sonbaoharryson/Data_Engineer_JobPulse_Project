@@ -1,7 +1,7 @@
 version: "3.9"
 
 x-airflow-common: &airflow-common
-  image: botchatdatabase:latest
+  image: job_warehouse_discord:latest
   restart: unless-stopped
   environment:
     - LOAD_EX=n
@@ -13,11 +13,14 @@ x-airflow-common: &airflow-common
     - DB_PASSWORD=${DB_PASSWORD}
     - DB_NAME=${DB_AIRFLOW}
     - AIRFLOW_WEBSERVER_SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
+    - DBT_TARGET=airflow
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/config/airflow.cfg:/opt/airflow/airflow.cfg
-    - ./airflow/scripts:/opt/airflow/scripts
     - ./airflow/entrypoint/entrypoint_airflow.sh:/opt/airflow/entrypoint.sh
+    - ./airflow/scripts:/opt/airflow/scripts
+    - ./airflow/tasks:/opt/airflow/tasks
+    - ./airflow/dbt:/opt/airflow/dbt
     - ./.env:/opt/airflow/.env
   networks:
     - discord_network
