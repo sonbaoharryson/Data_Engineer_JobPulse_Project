@@ -9,3 +9,8 @@ logs
 pg_data
 migrate_db
 profiles.yml
+target/
+dbt_packages/
+logs/
+.user.yml
+profiles.yml
