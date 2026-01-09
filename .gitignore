@@ -8,3 +8,4 @@ discord_bot_job_automate.egg-info
 logs
 pg_data
 migrate_db
+profiles.yml
