@@ -34,27 +34,46 @@ def scrape_source_job(sources: dict, source_crawl:str):
         except Exception as e:
             logger.error(f"Error scraping {source_crawl}: {e}")
         total_data_job += dict_jobs
-    return total_data_job if total_data_job else None
+
+    return_dict = {
+            'rows_processed': 0,
+            'rows_inserted': 0,
+            'rows_scraped':total_data_job,
+            'posts_sent': 0
+        }
+    return return_dict
 
 def insert_jobs_to_staging_layer(data:List[Dict], source_crawl:str):
     if not data:
         logger.info(f"No {source_crawl} jobs to insert")
-        return
+        return {}
 
     if source_crawl=='itviec':
         insert_itviec_jobs(data)
     elif source_crawl=='topcv':
         insert_topcv_jobs(data)
+    return_dict = {
+            'rows_processed': 0,
+            'rows_inserted': len(data),
+            'rows_scraped':0,
+            'posts_sent': 0
+        }
+    return return_dict
 
 def post_job_to_discord(crawl_source:str):
-    query_data = query_unposted_jobs(table_name='itviec_data_job') if crawl_source=='itviec' else query_unposted_jobs(table_name='topcv_data_job')
+    query_data = query_unposted_jobs(table_name='bronze_ingest_itviec') if crawl_source=='itviec' else query_unposted_jobs(table_name='bronze_ingest_topcv')
     jobs, urls = query_data
     logger.info(f"Found {len(jobs)} new {crawl_source} jobs to post to Discord")
     if not jobs:
         logger.info(f'No new jobs from {crawl_source} to post to Discord')
-        return
+        return {}
     try:
-        send_job_alerts(jobs, DISCORD_TOKEN, DISCORD_CHANNEL_ID)
-        mark_jobs_as_posted(table_name='itviec_data_job', job_urls=urls) if crawl_source=='itviec' else mark_jobs_as_posted(table_name='topcv_data_job', job_urls=urls)
+        posts_send, posts_failed_sent = send_job_alerts(jobs, DISCORD_TOKEN, DISCORD_CHANNEL_ID)
+        mark_jobs_as_posted(table_name='bronze_ingest_itviec', job_urls=urls) if crawl_source=='itviec' else mark_jobs_as_posted(table_name='bronze_ingest_topcv', job_urls=urls)
+        return_dict = {
+                'posts_sent': posts_send,
+                'posts_failed': posts_failed_sent
+            }
+        return return_dict
     except Exception as e:
         logger.error(f"Error sending job alerts to Discord: {e}")
