@@ -20,3 +20,10 @@ sources:
       - name: bronze_ingest_itviec
 
       - name: bronze_ingest_topcv
+
+  - name: audit_layer
+    database: job_db_sm4x
+    schema: audit
+
+    tables:
+      - name: master_job_elt_audit
