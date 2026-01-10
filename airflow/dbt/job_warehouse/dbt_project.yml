@@ -35,6 +35,9 @@ models:
 
     +database: job_db_sm4x
 
+    staging:
+      +materialized: view
+
     bronze:
       +schema: bronze
       +materialized: view
@@ -42,9 +45,6 @@ models:
     silver:
       +schema: silver
       +materialized: incremental
-
-      staging:
-        +materialized: view
 
     gold:
       +schema: gold
