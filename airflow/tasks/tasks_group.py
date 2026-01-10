@@ -13,17 +13,17 @@ def itviec_pipeline():
 
     @task
     def insert_jobs_itviec(data):
-        insert_jobs_to_staging_layer(data=data, source_crawl="itviec")
+        return insert_jobs_to_staging_layer(data=data['rows_scraped'], source_crawl="itviec")
 
     @task
     def post_job_to_discord_itviec():
-        post_job_to_discord(crawl_source="itviec")
+        return post_job_to_discord(crawl_source="itviec")
 
     source_crawl = load_itviec_url()
     scrapped_data = scrape_itviec_job(source_crawl)
     insert_data = insert_jobs_itviec(scrapped_data)
-    discord_post_job = post_job_to_discord_itviec()
-    insert_data >> discord_post_job
+    # discord_post_job = post_job_to_discord_itviec()
+    # insert_data >> discord_post_job
 
 @task_group
 def topcv_pipeline():
@@ -37,14 +37,14 @@ def topcv_pipeline():
 
     @task
     def insert_jobs_topcv(data):
-        insert_jobs_to_staging_layer(data=data, source_crawl="topcv")
+        return insert_jobs_to_staging_layer(data=data['rows_scraped'], source_crawl="topcv")
 
     @task
     def post_job_to_discord_topcv():
-        post_job_to_discord(crawl_source="topcv")
+        return post_job_to_discord(crawl_source="topcv")
 
     source_crawl = load_topcv_url()
     scrapped_data = scrape_topcv_job(source_crawl)
     insert_data = insert_jobs_topcv(scrapped_data)
-    discord_post_job = post_job_to_discord_topcv()
-    insert_data >> discord_post_job
+    # discord_post_job = post_job_to_discord_topcv()
+    # insert_data >> discord_post_job
