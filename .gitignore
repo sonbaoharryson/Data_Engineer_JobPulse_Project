@@ -14,3 +14,5 @@ dbt_packages/
 logs/
 .user.yml
 profiles.yml
+bot
+dashboard

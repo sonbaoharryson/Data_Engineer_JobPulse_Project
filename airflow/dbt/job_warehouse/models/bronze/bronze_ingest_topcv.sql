@@ -1,4 +1,9 @@
-{{ config(materialized='table', tags=['bronze_layer', 'basic_cleanse', 'topcv'])}}
+{{ config(
+    materialized='incremental',
+    unique_key='url',
+    incremental_strategy='merge',
+    tags=['bronze_layer', 'basic_cleanse', 'topcv']
+)}}
 
 SELECT
     id,
@@ -15,4 +20,9 @@ SELECT
     {{ initcap_and_trim('work_model') }} AS work_model,
     posted_to_discord,
     created_at
-from {{ source('job_raw', 'topcv_data_job') }}
+FROM {{ source('job_raw', 'topcv_data_job') }}
+
+{% if is_incremental() %}
+    -- Only process new records since last run
+    WHERE created_at > (SELECT MAX(created_at) FROM {{ this }})
+{% endif %}

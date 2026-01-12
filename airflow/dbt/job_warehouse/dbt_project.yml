@@ -40,7 +40,7 @@ models:
 
     bronze:
       +schema: bronze
-      +materialized: view
+      +materialized: incremental
 
     silver:
       +schema: silver
