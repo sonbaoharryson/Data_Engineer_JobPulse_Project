@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: silver_ingest_itviec
+    description: "Enriched Itviec job postings with parsed education and experience"
+    columns:
+      - name: url
+        tests: [not_null, unique]
+      - name: title
+        tests: [not_null]
+      - name: company
+        tests: [not_null]
+      - name: least_level_of_education
+        tests: [not_null]
+      - name: exp
+      - name: created_at
+        tests: [not_null]
+
+  - name: silver_ingest_topcv
+    description: "Enriched TopCV job postings with normalized education and experience"
+    columns:
+      - name: url
+        tests: [not_null, unique]
+      - name: title
+        tests: [not_null]
+      - name: company
+        tests: [not_null]
+      - name: least_level_of_education
+        tests: [not_null]
+      - name: exp
+      - name: created_at
+        tests: [not_null]
+
+  - name: silver_job_unified
+    description: "Canonical unified job postings across all platforms"
+    columns:
+      - name: source
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["itviec", "topcv"]
+
+      - name: url
+        tests: [not_null, unique]
+
+      - name: title
+        tests: [not_null]
+
+      - name: company
+        tests: [not_null]
+
+      - name: least_level_of_education
+        tests: [not_null]
+
+      - name: experience_required
+
+      - name: created_at
+        tests: [not_null]
+
+  - name: silver_dim_company
+    description: "Distinct list of companies"
+    columns:
+      - name: company
+        tests: [not_null, unique]
+
+  - name: silver_dim_location
+    description: "Distinct list of working locations"
+    columns:
+      - name: working_location
+        tests: [not_null, unique]
