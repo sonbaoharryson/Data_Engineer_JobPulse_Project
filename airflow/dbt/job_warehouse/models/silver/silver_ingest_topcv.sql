@@ -4,4 +4,4 @@ SELECT
     *,
     {{ least_level_of_education('level_of_education') }} AS least_level_of_education,
     {{ extract_experience('experiences') }} AS exp
-FROM {{ source('bronze_layer', 'bronze_ingest_topcv') }}
+FROM {{ ref('bronze_ingest_topcv') }}

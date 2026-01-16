@@ -4,4 +4,4 @@ SELECT
     *,
     {{ least_level_of_education('requirements_and_experiences') }} AS least_level_of_education,
     {{ extract_experience('requirements_and_experiences') }} AS exp
-FROM {{ source('bronze_layer', 'bronze_ingest_itviec') }}
+FROM {{ ref('bronze_ingest_itviec') }}
