@@ -3,6 +3,6 @@
 SELECT
     company_name,
     COUNT(*) AS total_jobs,
-    COUNT(DISTINCT location_name) AS total_locations
+    COUNT(DISTINCT working_location) AS total_locations
 FROM {{ ref('gold_job_fact') }}
 GROUP BY 1
