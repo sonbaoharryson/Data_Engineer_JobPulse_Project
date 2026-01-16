@@ -25,10 +25,10 @@ default_args = {
     schedule='@daily',
     tags=[
         "master_dag",
-        "itviec_process",
-        "topcv_process",
+        "itviec_pipeline",
+        "topcv_pipeline",
         "upload_discord",
-        "dbt_process",
+        "dbt_pipeline",
     ],
 )
 def master_elt():

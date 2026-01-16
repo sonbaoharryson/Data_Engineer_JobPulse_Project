@@ -20,13 +20,12 @@ default_args = {
     'retry_delay': timedelta(seconds=30),
     'on_success_callback': task_success_callback,
     'on_failure_callback': task_failure_callback
-
 }
 
 @dag(
-    dag_id='itviec_data_pipeline',
+    dag_id='itviec_pipeline',
     default_args=default_args,
-    schedule_interval=timedelta(days=30),
+    schedule=None,
     catchup=False,
     tags=['itviec_pipeline']
 )
