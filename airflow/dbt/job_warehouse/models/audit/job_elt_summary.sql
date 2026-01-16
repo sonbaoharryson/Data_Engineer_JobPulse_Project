@@ -11,7 +11,8 @@ SELECT
     SUM(rows_processed) as total_rows_processed,
     SUM(rows_inserted) as total_rows_inserted,
     SUM(rows_scraped) as total_rows_scraped,
-    SUM(discord_posts_sent) as total_discord_posts,
+    SUM(discord_posts_sent) as total_discord_posts_sent,
+    SUM(discord_posts_failed) as total_discord_posts_failed,
     AVG(duration_seconds) as avg_dag_duration_seconds,
     MIN(start_date) as first_start_time,
     MAX(end_date) as last_end_time
