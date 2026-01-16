@@ -1,15 +1,17 @@
 # Job Crawling & Analytics Pipeline
 
-A comprehensive data engineering pipeline for crawling job postings from multiple sources, storing them in a data warehouse, and posting them to Discord for job seekers. Built with Apache Airflow, PostgreSQL, and dbt following the Medallion Architecture.
+Design and implement an end-to-end data engineering pipeline that automatically crawls job postings from websites, ingests raw data into a **PostgreSQL** staging layer, publishes curated job alerts to a Discord channel, and builds a data warehouse using **dbt** with **Apache Trino** and **Iceberg**.
+
+The pipeline is orchestrated with **Apache Airflow**, uses **MinIO** as object storage, and follows the Medallion Architecture (Bronze–Silver–Gold) to ensure data quality, scalability, and analytical readiness.
 
 ## 🎯 Project Objective
 
 This project aims to:
-1. **Crawl job data** from multiple sources (TopCV, ITViec, and more in the future)
-2. **Store data** in PostgreSQL for data warehouse and analytics purposes
+1. **Crawl job data** from multiple sources (TopCV, ITViec, and could extend more sources in future 😊)
+2. **Store data** in PostgreSQL for database and MinIO for lakehouse.
 3. **Post jobs** to Discord channels for job seekers to discover opportunities
-4. **Process data** using dbt pipelines following Medallion Architecture (Bronze → Silver → Gold) for analytics
-5. **Future**: Develop an interactive Discord chatbot to help job seekers find suitable jobs based on warehouse data
+4. **Process data** using python to create script to crawl data from websites. Leveraging dbt to create pipelines for data warehouse following Medallion Architecture (Bronze → Silver → Gold) for analytics.
+5. **Future**: Develop an interactive Discord chatbot to help job seekers find suitable jobs based on warehouse data (***MAYBE WHEN I'm 60*** 🤣).
 
 ## 🏗️ Architecture Overview
 
@@ -21,14 +23,13 @@ This project aims to:
          │
          ▼
 ┌─────────────────┐
-│  Airflow DAGs   │
-│  (Crawling)      │
+│  Python Crawling|
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐      ┌──────────────┐
-│  PostgreSQL     │─────▶│  Discord Bot  │
-│  (Staging)      │      │  (Job Alerts) │
+│  PostgreSQL     │─────▶│  Discord Bot |
+│  (Insert data)  │      │  (Job Alerts)│
 └────────┬────────┘      └──────────────┘
          │
          ▼
@@ -39,65 +40,16 @@ This project aims to:
          │
          ▼
 ┌─────────────────┐
-│  Analytics      │
-│  (Gold Layer)   │
+│   BI Tools      │
+│  (Still Not Working 🤣)   │
 └─────────────────┘
-```
-
-## 📁 Project Structure
-
-```
-airflow/
-├── dags/                          # Airflow DAG definitions
-│   ├── job_itviec_pipeline.py    # ITViec crawling pipeline
-│   ├── job_topcv_pipeline.py     # TopCV crawling pipeline
-│   ├── sample_dag.py              # Sample DAG template
-│   └── test_dag.py                # Test DAG
-│
-├── scripts/                       # Core application scripts
-│   ├── crawl_scripts/            # Web scraping modules
-│   │   └── crawl_job/
-│   │       ├── crawler.py        # Main crawler interface
-│   │       ├── it_viec.py        # ITViec scraper
-│   │       ├── topcv.py          # TopCV scraper
-│   │       └── helpers/          # Helper functions
-│   │
-│   ├── utils/                     # Utility modules
-│   │   ├── db_conn.py            # Database connection
-│   │   ├── insert_data_staging.py # Data insertion to staging
-│   │   ├── formatter.py          # Discord embed formatter
-│   │   ├── sender.py             # Discord job posting
-│   │   └── load_crawl_source.py  # Source configuration loader
-│   │
-│   ├── source_itviec.json        # ITViec source URLs
-│   ├── source_topcv.json         # TopCV source URLs
-│   │
-│   └── test/                      # Test scripts
-│
-├── dbt/                           # dbt project for data transformation
-│   └── job_warehouse/
-│       ├── models/
-│       │   ├── bronze/           # Bronze layer (raw data views)
-│       │   ├── silver/           # Silver layer (cleaned data)
-│       │   └── gold/             # Gold layer (analytics-ready)
-│       ├── dbt_project.yml        # dbt configuration
-│       └── README.md             # dbt documentation
-│
-├── config/                        # Configuration files
-│   └── airflow.cfg               # Airflow configuration
-│
-├── entrypoint/                    # Docker entrypoint scripts
-│   └── entrypoint_airflow.sh    # Airflow initialization script
-│
-├── requirements.txt              # Python dependencies
-└── README.mdxzz
 ```
 
 ## 🔄 Data Pipeline Flow
 
 ### 1. **Crawling Stage** (Bronze Layer)
 - **DAGs**: `job_itviec_pipeline`, `job_topcv_pipeline`
-- **Schedule**: Every 15 days
+- **Schedule**: Manual run (mainly for individual run purpose)
 - **Process**:
   1. Load source URLs from JSON configuration files
   2. Scrape job postings using Selenium + ChromeDriver
@@ -118,21 +70,22 @@ airflow/
 ### 3. **Transformation Stage** (dbt - Medallion Architecture)
 
 #### **Bronze Layer** (`models/bronze/`)
-- **Purpose**: Raw data views from staging tables
-- **Materialization**: Views
+- **Purpose**: Raw data from staging tables
+- **Materialization**: Incremental table
 - **Models**:
-  - `sample_query_itviec.sql`: ITViec raw data view
-  - `sample_query_topcv.sql`: TopCV raw data view
+  - Please run `dbt docs serve --port 8085` for dbt documentation.
 
 #### **Silver Layer** (`models/silver/`)
 - **Purpose**: Cleaned, standardized, and validated data
-- **Materialization**: Incremental tables
-- **Process**: Data quality checks, standardization, deduplication
+- **Materialization**: Table
+- **Models**:
+  - Please run `dbt docs serve --port 8085` for dbt documentation.
 
 #### **Gold Layer** (`models/gold/`)
 - **Purpose**: Business-ready analytics tables
 - **Materialization**: Tables
-- **Use Cases**: Aggregations, metrics, business intelligence
+- **Models**:
+  - Please run `dbt docs serve --port 8085` for dbt documentation.
 
 ### 4. **Discord Integration**
 - **Functionality**: Automatically posts new job alerts to Discord channels
@@ -142,27 +95,18 @@ airflow/
   - Error handling and logging
   - Tracks posted jobs to prevent duplicates
 
-## 📦 Key Dependencies
-
-- `apache-airflow`: Workflow orchestration
-- `selenium`: Web scraping
-- `beautifulsoup4`: HTML parsing
-- `psycopg2-binary`: PostgreSQL adapter
-- `dbt-core`, `dbt-postgres`: Data transformation
-- `discord.py`: Discord bot integration
-- `sqlalchemy`: Database ORM
-
-See `requirements.txt` for complete list.
-
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.11+
-- PostgreSQL database
+- Python
 - Chrome/ChromeDriver (for web scraping)
 - Discord bot token and channel ID
-- Apache Airflow 2.9.1
+- Docker
+  - PostgreSQL database
+  - Apache Airflow
+  - Apache Trino
+  - MinIO
 
 ### Installation
 
@@ -304,41 +248,10 @@ Test scripts are available in `scripts/test/` (*this test is just make sure scri
 - `test_db_conn.py`: Test database connection
 - `send_job.py`: Test Discord posting
 
-## 🔮 Future Enhancements
-
-1. **Additional Job Sources**: Expand to more job boards
-2. **Discord Chatbot**: Interactive bot to help job seekers:
-   - Search jobs by criteria (location, salary, skills)
-   - Get job recommendations
-   - Apply directly through Discord
-   - Set up job alerts
-3. **Advanced Analytics**: 
-   - Job market trends
-   - Salary analysis
-   - Skill demand analysis
-4. **Data Quality**: Enhanced validation and cleaning
-5. **Monitoring**: Better observability and alerting
-
-## 🤝 Contributing
-
-To add a new job source:
-
-1. Create a new scraper class in `scripts/crawl_scripts/crawl_job/`
-2. Add it to `crawler.py`
-3. Create a new DAG in `dags/`
-4. Add source URLs JSON file
-5. Create staging table in database
-6. Add dbt models for bronze/silver/gold layers
-
-## 📄 License
-
-See LICENSE file in repository root.
-
 ## 👤 Author
 
 **Bao Phan (HarrySon)**
 
 ---
-
-For questions or issues, please open an issue in the repository.
+Please give me 1 star 😋🔥
 
