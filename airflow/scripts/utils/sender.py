@@ -11,10 +11,10 @@ if not logger.handlers:
 
 def query_unposted_jobs(table_name: str):
     engine = DBConnection().engine
-    salary_col = "salary" if table_name == 'bronze_ingest_topcv' else "'Sign-in ITViec for details.'"
+    salary_col = "salary" if table_name == 'topcv_data_job' else "'Sign-in ITViec for details.'"
     query = text(f"""
         SELECT title, url, logo_url as logo, working_location as location, {salary_col} as salary
-        FROM job_db_sm4x.job_wh_bronze.{table_name}
+        FROM job_db_sm4x.staging.{table_name}
         WHERE posted_to_discord = FALSE
     """)
     with engine.connect() as conn:
@@ -32,7 +32,7 @@ def mark_jobs_as_posted(table_name: str, job_urls: list):
 
     engine = DBConnection().engine
     query = text(f"""
-        UPDATE job_db_sm4x.job_wh_bronze.{table_name}
+        UPDATE job_db_sm4x.staging.{table_name}
         SET posted_to_discord = TRUE
         WHERE url = ANY(:urls)
     """)

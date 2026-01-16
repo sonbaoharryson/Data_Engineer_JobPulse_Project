@@ -61,7 +61,7 @@ def insert_jobs_to_staging_layer(data:List[Dict], source_crawl:str):
     return return_dict
 
 def post_job_to_discord(crawl_source:str):
-    query_data = query_unposted_jobs(table_name='bronze_ingest_itviec') if crawl_source=='itviec' else query_unposted_jobs(table_name='bronze_ingest_topcv')
+    query_data = query_unposted_jobs(table_name='itviec_data_job') if crawl_source=='itviec' else query_unposted_jobs(table_name='topcv_data_job')
     jobs, urls = query_data
     logger.info(f"Found {len(jobs)} new {crawl_source} jobs to post to Discord")
     if not jobs:
@@ -69,7 +69,7 @@ def post_job_to_discord(crawl_source:str):
         return {}
     try:
         posts_send, posts_failed_sent = send_job_alerts(jobs, DISCORD_TOKEN, DISCORD_CHANNEL_ID)
-        mark_jobs_as_posted(table_name='bronze_ingest_itviec', job_urls=urls) if crawl_source=='itviec' else mark_jobs_as_posted(table_name='bronze_ingest_topcv', job_urls=urls)
+        mark_jobs_as_posted(table_name='itviec_data_job', job_urls=urls) if crawl_source=='itviec' else mark_jobs_as_posted(table_name='topcv_data_job', job_urls=urls)
         return_dict = {
                 'posts_sent': posts_send,
                 'posts_failed': posts_failed_sent
