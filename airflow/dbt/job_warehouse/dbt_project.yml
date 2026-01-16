@@ -33,7 +33,7 @@ models:
     # example:
     #   +materialized: view
 
-    +database: job_db_sm4x
+    +database: iceberg #job_db_sm4x
 
     staging:
       +materialized: view
