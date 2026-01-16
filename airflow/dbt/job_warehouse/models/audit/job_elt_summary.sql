@@ -1,6 +1,7 @@
 {{ config(materialized='table', tags=['summary', 'audit', 'log_tasks']) }}
 
-SELECT 
+SELECT
+    task_name,
     DATE(execution_date) as execution_day,
     dag_status,
     COUNT(DISTINCT dag_run_id) as total_dag_runs,
@@ -16,5 +17,5 @@ SELECT
     MAX(end_date) as last_end_time
 FROM {{ source('audit_layer', 'master_job_elt_audit')}}
 WHERE dag_id = 'master_job_elt'
-GROUP BY DATE(execution_date), dag_status
+GROUP BY task_name, DATE(execution_date), dag_status
 ORDER BY execution_day DESC, dag_status
