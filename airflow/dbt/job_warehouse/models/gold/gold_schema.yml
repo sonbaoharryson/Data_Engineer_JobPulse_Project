@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: gold_job_fact
+    description: "Unified fact table of all job postings"
+    columns:
+      - name: url
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        tests:
+          - not_null
+      - name: posted_date
+        tests:
+          - not_null
+
+  - name: gold_job_daily_snapshot
+    description: "Daily job posting trend by platform"
+    columns:
+      - name: posted_date
+        tests:
+          - not_null
+
+  - name: gold_company_hiring_summary
+    description: "Job count per company"
+
+  - name: gold_location_job_summary
+    description: "Job count per location"
+
+  - name: gold_education_distribution
+    description: "Required education distribution"
