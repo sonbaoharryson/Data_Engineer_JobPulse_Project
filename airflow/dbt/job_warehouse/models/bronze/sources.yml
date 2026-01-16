@@ -12,14 +12,6 @@ sources:
       - name: itviec_data_job
         description: "Raw job data crawled from ITViec"
 
-  - name: bronze_layer
-    schema: bronze
-
-    tables:
-      - name: bronze_ingest_itviec
-
-      - name: bronze_ingest_topcv
-
   - name: audit_layer
     database: postgresql
     schema: audit

@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: bronze_ingest_itviec
+    description: "Raw ingested job postings from Itviec database"
+    columns:
+      - name: url
+        description: "Job posting URL"
+        tests:
+          - not_null
+          - unique
+
+      - name: title
+        description: "Raw job title"
+
+      - name: company
+        description: "Raw company name"
+        tests:
+          - not_null
+
+      - name: requirements_and_experiences
+        description: "Job requirements and experience text"
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Job creation timestamp"
+        tests:
+          - not_null
+
+  - name: bronze_ingest_topcv
+    description: "Raw ingested job postings from TopCV database"
+    columns:
+      - name: url
+        description: "Job posting URL"
+        tests:
+          - not_null
+          - unique
+
+      - name: title
+        description: "Raw job title"
+
+      - name: company
+        description: "Raw company name"
+        tests:
+          - not_null
+
+      - name: descriptions
+        description: "Job description text"
+        tests:
+          - not_null
+
+      - name: requirements
+        description: "Job requirements text"
+        tests:
+          - not_null
+
+      - name: experiences
+        description: "Experience requirements text"
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Job creation timestamp"
+        tests:
+          - not_null
