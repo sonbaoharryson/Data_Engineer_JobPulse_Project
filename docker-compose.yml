@@ -4,16 +4,17 @@ x-airflow-common: &airflow-common
   image: job_warehouse_discord:latest
   restart: unless-stopped
   environment:
-    - LOAD_EX=n
-    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW_HOME=/opt/airflow
-    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
-    - DB_HOST=${DB_HOST}
-    - DB_USER=${DB_USER}
-    - DB_PASSWORD=${DB_PASSWORD}
-    - DB_NAME=${DB_AIRFLOW}
-    - AIRFLOW_WEBSERVER_SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
-    - DBT_TARGET=airflow
+    AIRFLOW_HOME: /opt/airflow
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
+    AIRFLOW_WEBSERVER_SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+    AIRFLOW_CONN_TRINO_DEFAULT: trino://trino@trino:8080/default
+    DBT_TARGET: airflow
+    DB_HOST: ${DB_HOST}
+    DB_PORT: ${DB_PORT}
+    DB_USER: ${DB_USER}
+    DB_PASSWORD: ${DB_PASSWORD}
+    DB_NAME: ${DB_AIRFLOW}
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/config/airflow.cfg:/opt/airflow/airflow.cfg
@@ -22,34 +23,34 @@ x-airflow-common: &airflow-common
     - ./airflow/tasks:/opt/airflow/tasks
     - ./airflow/dbt:/opt/airflow/dbt
     - ./.env:/opt/airflow/.env
-  networks:
-    - discord_network
+  # networks:
+  #   - discord_network
 
 services:
   postgresql_db:
-    image: postgres:latest
+    image: postgres:latest # unchanged from your file
     container_name: postgresql_db
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_AIRFLOW}
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_AIRFLOW}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/01_create_db.sql
-      - ./db/init_schema_tables.sql:/docker-entrypoint-initdb.d/02_create_schema_tables.sql
+      - ./db/job_db/init_schema_tables.sql:/docker-entrypoint-initdb.d/02_create_schema_tables_job_db.sql
+      - ./db/trino/init_catalog_tables.sql:/docker-entrypoint-initdb.d/03_create_catalog_tables_trino.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_AIRFLOW}"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    networks:
-      - discord_network
+    # networks:
+    #   - discord_network
 
-  webserver:
+  airflow-webserver:
     <<: *airflow-common
     container_name: airflow-webserver
     depends_on:
@@ -57,35 +58,87 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
     entrypoint: ["/opt/airflow/entrypoint.sh"]
     command: webserver
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  airflow_scheduler:
-    <<: *airflow-common
-    container_name: airflow_scheduler
-    depends_on:
-      webserver:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob"]
-      interval: 30s
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 60s
       timeout: 30s
       retries: 5
-    command: airflow scheduler
 
-networks:
-  discord_network:
-    driver: bridge
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+    command: airflow scheduler
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+
+  object-store:
+    image: minio/minio
+    container_name: object-store
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: ["server", "/data", "--console-address", ":9001"]
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    # networks:
+    #   - discord_network
+
+  minio-init:
+    image: minio/mc
+    container_name: minio-init
+    depends_on:
+      object-store:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set minio http://object-store:9000 ${MINIO_USER} ${MINIO_PASSWORD}; do
+        sleep 2;
+      done &&
+      mc mb -p minio/warehouse || true
+      "
+    # networks:
+    #   - discord_network
+
+  trino:
+    image: trinodb/trino:latest
+    container_name: trino
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+      postgresql_db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: ${DB_HOST}
+      POSTGRES_PORT: ${DB_PORT}
+      POSTGRES_DB: ${DB_TRINO}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      MINIO_USER: ${MINIO_USER}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./catalog:/etc/trino/catalog
+    # networks:
+    #   - discord_network
+
+# networks:
+#   discord_network:
+#     driver: bridge
 
 volumes:
   postgres_data:
+  minio_data:
