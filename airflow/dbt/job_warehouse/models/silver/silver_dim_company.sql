@@ -1,6 +1,6 @@
 {{ config(materialized='table') }}
 
-SELECT company
+SELECT company_name
 FROM {{ ref('silver_jobs_unified') }}
-WHERE company IS NOT NULL
-GROUP BY company
+WHERE company_name IS NOT NULL
+GROUP BY company_name
