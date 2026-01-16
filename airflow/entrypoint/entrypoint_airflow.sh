@@ -2,15 +2,24 @@
 set -e
 
 echo "Waiting for database..."
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
+
+export PGPASSWORD="$DB_PASSWORD"
+
+until pg_isready \
+  -h "$DB_HOST" \
+  -p "$DB_PORT" \
+  -U "$DB_USER" \
+  -d "$DB_AIRFLOW"; do
+  echo "Postgres not ready yet..."
   sleep 5
 done
-echo "Database is ready."
 
-if [ -e "/opt/airflow/requirements.txt" ]; then
-  $(command -v python) -m pip install --upgrade pip
-  $(command -v pip) install -r requirements.txt
-fi
+echo "Postgres is ready."
+
+# if [ -e "/opt/airflow/requirements.txt" ]; then
+#   $(command -v python) -m pip install --upgrade pip
+#   $(command -v pip) install -r requirements.txt
+# fi
 
 # Initialize the database
 airflow db migrate
