@@ -1,19 +1,19 @@
 {%macro least_level_of_education(column_name) %}
 	CASE
-		WHEN lower( {{column_name}} ) ilike '%cao đẳng%'
-			OR lower( {{column_name}} ) ilike '%college%'
+		WHEN lower( {{column_name}} ) like '%cao đẳng%'
+			OR lower( {{column_name}} ) like '%college%'
 		THEN 'College'
 		
-		WHEN lower( {{column_name}} ) ilike '%đại học%'
-			OR lower( {{column_name}} ) ilike '%bachelor%'
+		WHEN lower( {{column_name}} ) like '%đại học%'
+			OR lower( {{column_name}} ) like '%bachelor%'
 		THEN 'Bachelor'
 		
-		WHEN lower( {{column_name}} ) ilike '%thạc sĩ%'
-			OR lower( {{column_name}} ) ilike '%master%'
+		WHEN lower( {{column_name}} ) like '%thạc sĩ%'
+			OR lower( {{column_name}} ) like '%master%'
 		THEN 'Master'
 		
-		WHEN lower( {{column_name}} ) ilike '%tiến sĩ%'
-			OR lower( {{column_name}} ) ilike '%phd%'
+		WHEN lower( {{column_name}} ) like '%tiến sĩ%'
+			OR lower( {{column_name}} ) like '%phd%'
 		THEN 'PhD'
 		
 	ELSE 'Unknown'
