@@ -56,7 +56,7 @@ This project aims to:
   3. Extract job details (title, company, location, salary, etc.)
   4. Insert/update jobs into PostgreSQL staging tables
   5. Query unposted jobs and send to Discord
-  6. Mark jobs as posted to avoid duplicates
+  6. Mark jobs as posted to avoid duplicate posts
 
 ### 2. **Staging Layer** (PostgreSQL)
 - **Schema**: `staging`
@@ -89,7 +89,7 @@ This project aims to:
 
 ### 4. **Discord Integration**
 - **Functionality**: Automatically posts new job alerts to Discord channels
-- **Format**: Rich embeds with job title, company, location, salary
+- **Format**: Embeds with job title, company, location, salary
 - **Features**:
   - Throttling to avoid rate limits
   - Error handling and logging
@@ -208,11 +208,9 @@ Format:
 - **Schemas**: `{default_dbt_schema}_bronze`, `{default_dbt_schema}_silver`, `{default_dbt_schema}_gold`
 - See `dbt/job_warehouse/dbt_project.yml` for details
 
-## 📈 Data Models
+## 📈 Staging Tables
 
-### Staging Tables
-
-#### `itviec_data_job`
+### `itviec_data_job`
 - `id` (PK)
 - `title`
 - `company`
@@ -225,7 +223,7 @@ Format:
 - `requirements_and_experiences`
 - `posted_to_discord` (boolean)
 
-#### `topcv_data_job`
+### `topcv_data_job`
 - `id` (PK)
 - `title`
 - `company`
@@ -240,7 +238,7 @@ Format:
 - `work_model`
 - `posted_to_discord` (boolean)
 
-## 🧪 Testing
+## 🧪 Function Testing
 
 Test scripts are available in `scripts/test/` (*this test is just make sure scripts could be runable*):
 - `test_crawl_it_viec.py`: Test ITViec scraper
@@ -253,5 +251,5 @@ Test scripts are available in `scripts/test/` (*this test is just make sure scri
 **Bao Phan (HarrySon)**
 
 ---
-Please give me 1 star 😋🔥
+Please give my repo 1 star 😋🔥
 
