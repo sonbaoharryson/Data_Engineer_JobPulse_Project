@@ -1,255 +1,302 @@
-# Job Crawling & Analytics Pipeline
+# 🚀 Job Crawling & Analytics Pipeline
 
-Design and implement an end-to-end data engineering pipeline that automatically crawls job postings from websites, ingests raw data into a **PostgreSQL** staging layer, publishes curated job alerts to a Discord channel, and builds a data warehouse using **dbt** with **Apache Trino** and **Iceberg**.
+An end-to-end **Data Engineering project** that automatically crawls job postings from multiple websites, ingests raw data into **PostgreSQL** and **MinIO**, publishes curated job alerts to **Discord**, and builds a modern **Lakehouse-style Data Warehouse** using **dbt**, **Apache Trino**, and **Iceberg**.
 
-The pipeline is orchestrated with **Apache Airflow**, uses **MinIO** as object storage, and follows the Medallion Architecture (Bronze–Silver–Gold) to ensure data quality, scalability, and analytical readiness.
+The entire pipeline is orchestrated with **Apache Airflow** and follows the **Medallion Architecture (Bronze → Silver → Gold)** to ensure scalability, data quality, and analytics readiness.
 
-## 🎯 Project Objective
+> ⚠️ This project is built for **learning, experimentation, and portfolio showcase** purposes.
+
+---
+
+## 🌟 Project Highlights
+
+* 🔎 **Automated job crawling** from job websites (ITViec, TopCV)
+* 🧱 **Medallion Architecture** with dbt (Bronze / Silver / Gold)
+* ❄️ **Lakehouse design** using Iceberg + Trino + MinIO
+* 📣 **Discord job alerts** with deduplication
+* 🛠 **Airflow orchestration** with modular DAGs
+* ☁️ **Object storage** powered by MinIO
+* 🔄 **Upsert & incremental processing** for efficiency
+* ✅ **Data quality validation** with Great Expectations (pre-staging checks)
+
+## 🎯 Project Objectives
 
 This project aims to:
-1. **Crawl job data** from multiple sources (TopCV, ITViec, and could extend more sources in future 😊)
-2. **Store data** in PostgreSQL for database and MinIO for lakehouse.
-3. **Post jobs** to Discord channels for job seekers to discover opportunities
-4. **Process data** using python to create script to crawl data from websites. Leveraging dbt to create pipelines for data warehouse following Medallion Architecture (Bronze → Silver → Gold) for analytics.
-5. **Future**: Develop an interactive Discord chatbot to help job seekers find suitable jobs based on warehouse data (***MAYBE WHEN I'm 60*** 🤣).
 
-## 🏗️ Architecture Overview
+1. Crawl job postings from multiple sources (currently **ITViec** and **TopCV**, could extend more sources)
+2. Store raw and processed data in:
+
+   * **PostgreSQL** (staging / operational layer)
+   * **MinIO + Iceberg** (analytical lakehouse)
+3. Automatically publish **new job alerts to Discord** without duplicates
+4. Transform and model data using **dbt** following Medallion Architecture.
+5. Future enhancement features such as:
+
+   * 🤖 Discord chatbot for job recommendations *(maybe when I’m 60 🤣)*
+
+---
+
+## 🏗️ High-Level Architecture
 
 ```
 ┌─────────────────┐
 │  Job Sources    │
-│ (TopCV, ITViec) │
+│ (ITViec, TopCV) │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│  Python Crawling|
+│ Python Crawlers │
+│ (Selenium+bs4)  │
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐      ┌──────────────┐
-│  PostgreSQL     │─────▶│  Discord Bot |
-│  (Insert data)  │      │  (Job Alerts)│
-└────────┬────────┘      └──────────────┘
+┌───────────────────┐
+│ Great Expectation │
+│ (Data Validation) │
+└────────┬──────────┘
+         │
+         ▼
+┌─────────────────┐       ┌─────────────────┐
+│  PostgreSQL     │─────▶│ Discord Channels │
+│  (Staging)     │        │   (Job Alerts)  │
+└────────┬────────┘       └─────────────────┘
          │
          ▼
 ┌─────────────────┐
-│  dbt Pipeline   │
-│  (Medallion)    │
+│   dbt + Trino   │
+│  (Bronze/Silver │
+│   / Gold)       │
 └────────┬────────┘
          │
          ▼
-┌─────────────────┐
-│   BI Tools      │
-│  (Still Not Working 🤣)   │
-└─────────────────┘
+┌──────────────────────┐
+│ BI / Analytics Tools │
+│ (Coming soon 😅)     │
+└──────────────────────┘
 ```
+
+---
 
 ## 🔄 Data Pipeline Flow
 
-### 1. **Crawling Stage** (Bronze Layer)
-- **DAGs**: `job_itviec_pipeline`, `job_topcv_pipeline`
-- **Schedule**: Manual run (mainly for individual run purpose)
-- **Process**:
+### 1️⃣ Crawling Stage (Bronze Ingestion)
+
+* **Airflow DAGs**:
+
+  * `itviec_data_pipeline`
+  * `topcv_data_pipeline`
+* **Trigger**: Manual (for running single source only)
+* **Steps**:
+
   1. Load source URLs from JSON configuration files
-  2. Scrape job postings using Selenium + ChromeDriver
-  3. Extract job details (title, company, location, salary, etc.)
-  4. Insert/update jobs into PostgreSQL staging tables
-  5. Query unposted jobs and send to Discord
-  6. Mark jobs as posted to avoid duplicate posts
+  2. Scrape job postings using **Selenium + ChromeDriver**
+  3. Extract structured job information
+  4. **Validate raw data with Great Expectations (per source)**
+  5. Upsert records into PostgreSQL staging tables
+  6. Identify unposted jobs
+  7. Publish jobs to Discord
+  8. Mark jobs as posted to avoid duplicates
 
-### 2. **Staging Layer** (PostgreSQL)
-- **Schema**: `staging`
-- **Tables**:
-  - `itviec_data_job`: ITViec job postings
-  - `topcv_data_job`: TopCV job postings
-- **Features**:
-  - Upsert logic (ON CONFLICT) to handle duplicates
-  - `posted_to_discord` flag to track Discord posting status
+  * `master_dag`
+* **Trigger**: Daily
+* **Steps**:
 
-### 3. **Transformation Stage** (dbt - Medallion Architecture)
+  1. Run topcv and itviec pipeline (scrape data and ingest into staging layer).
+  2. Post unposted jobs to Discord channel and run dbt pipeline for data lakehouse data.
 
-#### **Bronze Layer** (`models/bronze/`)
-- **Purpose**: Raw data from staging tables
-- **Materialization**: Incremental table
-- **Models**:
-  - Please run `dbt docs serve --port 8085` for dbt documentation.
+---
 
-#### **Silver Layer** (`models/silver/`)
-- **Purpose**: Cleaned, standardized, and validated data
-- **Materialization**: Table
-- **Models**:
-  - Please run `dbt docs serve --port 8085` for dbt documentation.
+### 2️⃣ Staging Layer (PostgreSQL)
 
-#### **Gold Layer** (`models/gold/`)
-- **Purpose**: Business-ready analytics tables
-- **Materialization**: Tables
-- **Models**:
-  - Please run `dbt docs serve --port 8085` for dbt documentation.
+* **Schema**: `staging`
+* **Purpose**: Operational storage
+* **Key Features**:
 
-### 4. **Discord Integration**
-- **Functionality**: Automatically posts new job alerts to Discord channels
-- **Format**: Embeds with job title, company, location, salary
-- **Features**:
-  - Throttling to avoid rate limits
-  - Error handling and logging
-  - Tracks posted jobs to prevent duplicates
+  * `ON CONFLICT` upsert logic
+  * `posted_to_discord` flag for idempotency
+
+**Tables**:
+
+* `staging.itviec_data_job`
+* `staging.topcv_data_job`
+
+---
+
+### 3️⃣ Transformation Layer (dbt – Medallion Architecture)
+
+#### 🥉 Bronze Layer (`models/bronze/`)
+
+* Raw data mirrored from PostgreSQL staging
+* Minimal transformations
+* **Materialization**: Incremental tables
+
+#### 🥈 Silver Layer (`models/silver/`)
+
+* Cleaned & standardized data
+* Deduplication, normalization, validation
+* **Materialization**: Tables
+
+#### 🥇 Gold Layer (`models/gold/`)
+
+* Business-ready analytical models
+* Optimized for reporting & insights
+* **Materialization**: Tables
+
+📘 Get more detail documentation with:
+
+```bash
+dbt docs serve --port 8085
+```
+
+---
+
+## 📣 Discord Integration
+
+* Automatically posts **new job alerts**
+* Rich **Discord embeds** with:
+  * Job title
+  * Company
+  * Location
+  * Salary (if available)
+* Built-in:
+  * Error handling
+  * Logging
+  * Duplicate prevention
+
+---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 🔧 Prerequisites
 
-- Python
-- Chrome/ChromeDriver (for web scraping)
-- Discord bot token and channel ID
-- Docker
-  - PostgreSQL database
-  - Apache Airflow
-  - Apache Trino
-  - MinIO
+* Python 3.9+
+* Google Chrome + ChromeDriver
+* Discord Bot Token & Channel ID
+* Docker & Docker Compose
+* Services:
 
-### Installation
+  * PostgreSQL
+  * Apache Airflow
+  * Apache Trino
+  * MinIO
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd bot_chat_discord/airflow
-   ```
+---
 
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 📦 Installation
 
-3. **Configure environment variables**
-   Create a `.env` file or set environment variables:
-   ```bash
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_USER=your_user
-   DB_PASSWORD=your_password
-   DB_AIRFLOW=airflow_db
-   DB_JOB=job_db_sm4x
-   DISCORD_TOKEN=your_discord_token
-   DISCORD_CHANNEL_ID=your_channel_id
-   AIRFLOW__WEBSERVER__SECRET_KEY=your_secret_key
-   ```
+#### 1. Clone the Repository
 
-4. **Configure source URLs**
-   - Edit `scripts/source_itviec.json` for ITViec URLs
-   - Edit `scripts/source_topcv.json` for TopCV URLs
+```bash
+git clone <repository-url>
+cd bot_chat_discord/airflow
+```
 
-5. **Set up database schema**
-   - Create staging tables (see database scripts in `../db/scripts/`)
-   - Ensure proper permissions
+#### 2. Install Python Dependencies
 
-6. **Initialize Airflow**
-   ```bash
-   airflow db init
-   airflow users create \
-     --username admin \
-     --firstname Admin \
-     --lastname User \
-     --role Admin \
-     --email admin@example.com \
-     --password admin
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-7. **Start Airflow**
-   ```bash
-   airflow webserver --port 8080
-   airflow scheduler
-   ```
+#### 3. Environment Variables
 
-### Running with Docker
+Create a `.env` file:
 
-See `docker-compose.yml` for Docker setup.
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_AIRFLOW=airflow_db
+DB_JOB=job_db_sm4x
+DISCORD_TOKEN=your_discord_token
+DISCORD_CHANNEL_ID=your_channel_id
+AIRFLOW__WEBSERVER__SECRET_KEY=your_secret_key
+```
 
-## 📊 DAGs Overview
+#### 4. Configure Job Sources
 
-### `itviec_data_pipeline`
-- **Schedule**: Every 15 days (for testing); could set based on your preference.
-- **Tasks**:
-  1. `load_itviec_url`: Load ITViec source URLs
-  2. `scrape_itviec_job`: Scrape job postings
-  3. `insert_jobs`: Insert into staging table
-  4. `post_job_to_discord`: Post new jobs to Discord
+* `scripts/source_itviec.json`
+* `scripts/source_topcv.json`
 
-### `topcv_data_pipeline`
-- **Schedule**: Every 15 days (for testing); could set based on your preference.
-- **Tasks**:
-  1. `load_topcv_url`: Load TopCV source URLs
-  2. `scrape_topcv_job`: Scrape job postings
-  3. `insert_jobs`: Insert into staging table
-  4. `post_job_to_discord`: Post new jobs to Discord
-
-## 🔧 Configuration
-
-### Source Configuration
-Source URLs are configured in JSON files:
-- `scripts/source_itviec.json`: ITViec job search URLs
-- `scripts/source_topcv.json`: TopCV job search URLs
-
-Format:
 ```json
 {
   "source_name": "https://example.com/jobs?query=..."
 }
 ```
 
-### Database Configuration
-- **Staging Schema**: `staging` for crawled data ingestion layer.
-- **Database**: Configured via `DB_JOB` environment variable
-- **Connection**: Managed via `scripts/utils/db_conn.py`
+---
 
-### dbt Configuration
-- **Profile**: `job_warehouse`
-- **Database**: `job_db_sm4x`
-- **Schemas**: `{default_dbt_schema}_bronze`, `{default_dbt_schema}_silver`, `{default_dbt_schema}_gold`
-- See `dbt/job_warehouse/dbt_project.yml` for details
+### 🗄 Database Setup
 
-## 📈 Staging Tables
+* Create `staging` schema
+* Initialize tables (see `db/scripts/`)
+* Grant proper permissions
 
-### `itviec_data_job`
-- `id` (PK)
-- `title`
-- `company`
-- `logo_url`
-- `url` (unique not null)
-- `working_location`
-- `work_model`
-- `tags`
-- `descriptions`
-- `requirements_and_experiences`
-- `posted_to_discord` (boolean)
+---
 
-### `topcv_data_job`
-- `id` (PK)
-- `title`
-- `company`
-- `logo_url`
-- `url` (unique)
-- `working_location`
-- `salary`
-- `descriptions`
-- `requirements`
-- `experiences`
-- `level_of_education`
-- `work_model`
-- `posted_to_discord` (boolean)
+### 🌀 Airflow Setup
 
-## 🧪 Function Testing
+```bash
+airflow db init
 
-Test scripts are available in `scripts/test/` (*this test is just make sure scripts could be runable*):
-- `test_crawl_it_viec.py`: Test ITViec scraper
-- `test_crawl_topcv.py`: Test TopCV scraper
-- `test_db_conn.py`: Test database connection
-- `send_job.py`: Test Discord posting
+airflow users create \
+  --username admin \
+  --firstname Admin \
+  --lastname User \
+  --role Admin \
+  --email admin@example.com \
+  --password admin
+```
+
+Start services:
+
+```bash
+airflow webserver --port 8080
+airflow scheduler
+```
+
+---
+
+### 🐳 Docker Setup
+
+Refer to `docker-compose.yml` to spin up all services with Docker.
+
+---
+
+## ⏱ Airflow DAGs Overview
+
+### `itviec_data_pipeline`
+
+* **Schedule**: Every 15 days (configurable)
+* **Tasks**:
+
+  1. Load URLs
+  2. Scrape jobs
+  3. Insert / upsert jobs
+  4. Post new jobs to Discord
+
+### `topcv_data_pipeline`
+
+* Same structure as ITViec pipeline
+
+---
+
+## 🧪 Testing
+
+Basic test scripts are available under `scripts/test/`:
+
+* `test_crawl_it_viec.py`
+* `test_crawl_topcv.py`
+* `test_db_conn.py`
+* `send_job.py`
+
+> These tests mainly ensure scripts are **runnable**, not full unit tests.
 
 ## 👤 Author
 
 **Bao Phan (HarrySon)**
 
 ---
-Please give my repo 1 star 😋🔥
 
+⭐ If you find this project useful, **please give the repo a star** — its much helps! 😋🔥
