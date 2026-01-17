@@ -16,11 +16,6 @@ done
 
 echo "Postgres is ready."
 
-# if [ -e "/opt/airflow/requirements.txt" ]; then
-#   $(command -v python) -m pip install --upgrade pip
-#   $(command -v pip) install -r requirements.txt
-# fi
-
 # Initialize the database
 airflow db migrate
 
