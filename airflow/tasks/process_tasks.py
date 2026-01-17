@@ -7,6 +7,9 @@ from scripts.crawl_scripts.crawl_job.crawler import Crawler
 from scripts.utils.load_crawl_source import load_crawl_sources
 from scripts.utils.insert_data_staging import insert_itviec_jobs, insert_topcv_jobs
 from scripts.utils.sender import query_unposted_jobs, mark_jobs_as_posted, send_job_alerts
+from scripts.validation.itviec import expectations as itviec_expectations
+from scripts.validation.topcv import expectations as topcv_expectations
+from scripts.validation.ge_runner import run_ge_validation
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -34,7 +37,11 @@ def scrape_source_job(sources: dict, source_crawl:str):
         except Exception as e:
             logger.error(f"Error scraping {source_crawl}: {e}")
         total_data_job += dict_jobs
-
+    run_ge_validation(
+        records=total_data_job,
+        expectation_fn=itviec_expectations if source_crawl=='itviec' else topcv_expectations,
+        source_name=source_crawl
+    )
     return_dict = {
             'rows_processed': 0,
             'rows_inserted': 0,
