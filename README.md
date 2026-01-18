@@ -166,109 +166,12 @@ dbt docs serve --port 8085
 
 ---
 
-## 🚀 Getting Started
-
-### 🔧 Prerequisites
-
-* Python 3.9+
-* Google Chrome + ChromeDriver
-* Discord Bot Token & Channel ID
-* Docker & Docker Compose
-* Services:
-
-  * PostgreSQL
-  * Apache Airflow
-  * Apache Trino
-  * MinIO
-
----
-
-### 📦 Installation
-
-#### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd bot_chat_discord/airflow
-```
-
-#### 2. Install Python Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-#### 3. Environment Variables
-
-Create a `.env` file:
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_AIRFLOW=airflow_db
-DB_JOB=job_db_sm4x
-DISCORD_TOKEN=your_discord_token
-DISCORD_CHANNEL_ID=your_channel_id
-AIRFLOW__WEBSERVER__SECRET_KEY=your_secret_key
-```
-
-#### 4. Configure Job Sources
-
-* `scripts/source_itviec.json`
-* `scripts/source_topcv.json`
-
-```json
-{
-  "source_name": "https://example.com/jobs?query=..."
-}
-```
-
----
-
-### 🗄 Database Setup
-
-* Create `staging` schema
-* Initialize tables (see `db/scripts/`)
-* Grant proper permissions
-
----
-
-### 🌀 Airflow Setup
-
-```bash
-airflow db init
-
-airflow users create \
-  --username admin \
-  --firstname Admin \
-  --lastname User \
-  --role Admin \
-  --email admin@example.com \
-  --password admin
-```
-
-Start services:
-
-```bash
-airflow webserver --port 8080
-airflow scheduler
-```
-
----
-
-### 🐳 Docker Setup
-
-Refer to `docker-compose.yml` to spin up all services with Docker.
-
----
 
 ## ⏱ Airflow DAGs Overview
 
 ### `itviec_data_pipeline`
 
-* **Schedule**: Every 15 days (configurable)
+* **Schedule**: Manual Run (configurable - for specific run only - for testing - ...)
 * **Tasks**:
 
   1. Load URLs
@@ -289,7 +192,7 @@ Basic test scripts are available under `scripts/test/`:
 * `test_crawl_it_viec.py`
 * `test_crawl_topcv.py`
 * `test_db_conn.py`
-* `send_job.py`
+* ...
 
 > These tests mainly ensure scripts are **runnable**, not full unit tests.
 
