@@ -39,9 +39,9 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/01_create_db.sql
-      - ./db/job_db/init_schema_tables.sql:/docker-entrypoint-initdb.d/02_create_schema_tables_job_db.sql
-      - ./db/trino/init_catalog_tables.sql:/docker-entrypoint-initdb.d/03_create_catalog_tables_trino.sql
+      - ./postgresql/init_db/init.sql:/docker-entrypoint-initdb.d/01_create_db.sql
+      - ./postgresql/init_schema_table/init_schema_tables.sql:/docker-entrypoint-initdb.d/02_create_schema_tables_job_db.sql
+      - ./postgresql/init_wh_catalog/init_catalog_tables.sql:/docker-entrypoint-initdb.d/03_create_catalog_tables_trino.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_AIRFLOW}"]
       interval: 10s
@@ -131,10 +131,32 @@ services:
     ports:
       - "8081:8080"
     volumes:
-      - ./catalog:/etc/trino/catalog
+      - ./trino/catalog:/etc/trino/catalog
     # networks:
     #   - discord_network
 
+  trino-init:
+    image: trinodb/trino:latest
+    container_name: trino-init
+    depends_on:
+      trino:
+        condition: service_started
+      postgresql_db:
+        condition: service_healthy
+    volumes:
+      - ./trino/init_schema:/init_schema
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for Trino...';
+      until trino --server http://trino:8080 --execute 'SELECT 1'; do
+        sleep 3;
+      done;
+
+      echo 'Running init_schema.sql';
+      trino --server http://trino:8080 --file /init_schema/init_schema.sql;
+      echo 'Init schema completed';
+      "
+    restart: "no"
 # networks:
 #   discord_network:
 #     driver: bridge
