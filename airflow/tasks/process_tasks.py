@@ -3,13 +3,13 @@ import sys
 import logging
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from typing import List, Dict
+from scripts.validation.ge_runner import run_ge_validation
 from scripts.crawl_scripts.crawl_job.crawler import Crawler
 from scripts.utils.load_crawl_source import load_crawl_sources
+from scripts.validation.topcv import expectations as topcv_expectations
+from scripts.validation.itviec import expectations as itviec_expectations
 from scripts.utils.insert_data_staging import insert_itviec_jobs, insert_topcv_jobs
 from scripts.utils.sender import query_unposted_jobs, mark_jobs_as_posted, send_job_alerts
-from scripts.validation.itviec import expectations as itviec_expectations
-from scripts.validation.topcv import expectations as topcv_expectations
-from scripts.validation.ge_runner import run_ge_validation
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -25,6 +25,24 @@ def load_crawl_sources_url(source_crawl:str):
         data = load_crawl_sources(file_name='source_topcv.json')
     return data
 
+def deduplicate_jobs(jobs: list[dict], key: str = "url") -> list[dict]:
+    seen = set()
+    deduped = []
+
+    for job in jobs:
+        if not isinstance(job, dict):
+            continue
+
+        value = job.get(key)
+        if not value:
+            continue
+
+        if value not in seen:
+            seen.add(value)
+            deduped.append(job)
+
+    return deduped
+
 def scrape_source_job(sources: dict, source_crawl:str):
     crawler = Crawler(source_crawl)
     total_data_job = []
@@ -37,15 +55,19 @@ def scrape_source_job(sources: dict, source_crawl:str):
         except Exception as e:
             logger.error(f"Error scraping {source_crawl}: {e}")
         total_data_job += dict_jobs
+    
+    deduped_jobs = deduplicate_jobs(total_data_job)
+    
+    source_expectations = itviec_expectations if source_crawl=='itviec' else topcv_expectations
     run_ge_validation(
-        records=total_data_job,
-        expectation_fn=itviec_expectations if source_crawl=='itviec' else topcv_expectations,
+        records=deduped_jobs,
+        expectation_fn=source_expectations,
         source_name=source_crawl
     )
     return_dict = {
             'rows_processed': 0,
             'rows_inserted': 0,
-            'rows_scraped':total_data_job,
+            'rows_scraped':deduped_jobs,
             'posts_sent': 0
         }
     return return_dict
