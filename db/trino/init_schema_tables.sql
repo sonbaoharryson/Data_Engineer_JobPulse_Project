@@ -1,2 +1,0 @@
-CREATE SCHEMA IF NOT EXISTS iceberg.bronze;
-CREATE SCHEMA IF NOT EXISTS iceberg.audit;
