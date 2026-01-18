@@ -24,13 +24,13 @@ The entire pipeline is orchestrated with **Apache Airflow** and follows the **Me
 This project aims to:
 
 1. Crawl job postings from multiple sources (currently **ITViec** and **TopCV**, could extend more sources)
-2. Store raw and processed data in:
-
+2. Validate data with **Great Expectation** before storing them.
+3. Store raw and processed data in:
    * **PostgreSQL** (staging / operational layer)
    * **MinIO + Iceberg** (analytical lakehouse)
-3. Automatically publish **new job alerts to Discord** without duplicates
-4. Transform and model data using **dbt** following Medallion Architecture.
-5. Future enhancement features such as:
+4. Automatically publish **new job alerts to Discord** without duplicates
+5. Transform and model data using **dbt** following Medallion Architecture.
+6. Future enhancement features such as:
 
    * 🤖 Discord chatbot for job recommendations *(maybe when I’m 60 🤣)*
 
