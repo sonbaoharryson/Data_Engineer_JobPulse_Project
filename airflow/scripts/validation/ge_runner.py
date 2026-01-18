@@ -41,7 +41,13 @@ def run_ge_validation(
 
     if not result.success:
         failed = [
-            r.expectation_config.expectation_type
+            f"{r.expectation_config.type} for column {r.expectation_config.kwargs['column']}"
+            for r in result.results
+            if not r.success
+        ]
+
+        unexp_list = [
+            f"Unexpected List: {r.result['partial_unexpected_list']}"
             for r in result.results
             if not r.success
         ]
@@ -49,6 +55,7 @@ def run_ge_validation(
         raise ValueError(
             f"[GE] Validation failed for {source_name}. "
             f"Failed expectations: {failed}"
+            f"Unexpected list: {unexp_list}"
         )
 
     logger.info(
