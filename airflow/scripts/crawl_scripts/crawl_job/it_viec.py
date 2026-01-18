@@ -65,6 +65,7 @@ class ITViecScraper:
 
         logger.info(f"Found {len(jobs)} jobs")
         job_data: List[Dict[str, Optional[str]]] = []
+        job_url = []
 
         for idx, job in enumerate(jobs, 1):
             logger.info(f"Processing job {idx}/{len(jobs)}")
@@ -123,7 +124,8 @@ class ITViecScraper:
                     data["tags"] = ", ".join(tags) if tags else None
 
                 # -------- DETAIL PAGE (NEW DRIVER) -------- #
-                if data["url"]:
+                if data["url"] and data["url"] not in job_url:
+                    job_url.append(data["url"])
                     detail_driver = self._init_driver()
                     try:
                         detail_driver.get(data["url"])
@@ -143,7 +145,8 @@ class ITViecScraper:
 
                     finally:
                         detail_driver.quit()
-
+                else:
+                    continue
             except Exception as e:
                 logger.error(f"Job skipped due to unexpected error: {e}")
             

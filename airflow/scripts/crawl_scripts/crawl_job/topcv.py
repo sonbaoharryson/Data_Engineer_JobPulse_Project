@@ -188,6 +188,7 @@ class TopCVScraper:
         
         job_data: List[Dict[str, Optional[str]]] = []
         detail_driver = self._init_driver()
+        job_url_list = []
         for idx, job in enumerate(jobs, 1):
             try:
                 logger.info(f"Processing job {idx}/{len(jobs)}")
@@ -215,7 +216,8 @@ class TopCVScraper:
                 data['experience'] = exp
 
                 # Create new driver for each job detail to avoid bot detection
-                if job_url:
+                if job_url and job_url not in job_url_list:
+                    job_url_list.append(job_url)
                     try:
                         detail_driver.get(job_url)
 
@@ -245,7 +247,8 @@ class TopCVScraper:
                         data['type_of_work'] = type_of_work
                     finally:
                         time.sleep(0.5 + random.uniform(0.5, 2.5))
-
+                else:
+                    continue
             except Exception as e:
                 logger.error(f"Error processing job, skipping... {e}")
             
