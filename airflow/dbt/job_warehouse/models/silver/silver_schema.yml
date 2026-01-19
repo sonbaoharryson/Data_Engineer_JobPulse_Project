@@ -31,7 +31,7 @@ models:
       - name: created_at
         tests: [not_null]
 
-  - name: silver_job_unified
+  - name: silver_jobs_unified
     description: "Canonical unified job postings across all platforms"
     columns:
       - name: source
