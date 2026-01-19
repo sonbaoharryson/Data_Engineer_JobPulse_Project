@@ -18,6 +18,7 @@ The entire pipeline is orchestrated with **Apache Airflow** and follows the **Me
 * ☁️ **Object storage** powered by MinIO
 * 🔄 **Upsert & incremental processing** for efficiency
 * ✅ **Data quality validation** with Great Expectations (pre-staging checks)
+* ✅ **Task Auditting** with custom callback functions, enable task audit performance.
 
 ## 🎯 Project Objectives
 
@@ -76,6 +77,7 @@ This project aims to:
 └──────────────────────┘
 ```
 
+![alt text](images/project_architecture.png)
 ---
 
 ## 🔄 Data Pipeline Flow
@@ -183,6 +185,15 @@ dbt docs serve --port 8085
 
 * Same structure as ITViec pipeline
 
+### `master_dag`
+
+* **Schedule**: Daily.
+* **Tasks**:
+
+  1. Run ITViec and Topcv Pipeline (Scrape jobs, validate data with GE and insert into Staging layer).
+  2. Post un-post jobs to Discord channel.
+  3. Run dbt Pipeline.
+
 ---
 
 ## 🧪 Testing
@@ -196,8 +207,19 @@ Basic test scripts are available under `scripts/test/`:
 
 > These tests mainly ensure scripts are **runnable**, not full unit tests.
 
-## 👤 Author
+## 🖥️ Images
 
+- Master dag of JobPulse.
+![alt text](images/master_dag.png)
+
+- Audit layer.
+![alt text](images/audit_layer_postgres.png)
+
+- Lakehouse Catalog
+
+- ...
+
+## 👤 Author
 **Bao Phan (HarrySon)**
 
 ---
