@@ -215,7 +215,8 @@ Basic test scripts are available under `scripts/test/`:
 - Audit layer.
 ![alt text](images/audit_layer_postgres.png)
 
-- Lakehouse Catalog
+- Discord jobs post
+![alt text](images/discord_jobs_post.png)
 
 - ...
 
