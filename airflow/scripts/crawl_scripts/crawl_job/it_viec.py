@@ -150,7 +150,7 @@ class ITViecScraper:
             except Exception as e:
                 logger.error(f"Job skipped due to unexpected error: {e}")
             
-            if data['url']:
+            if data['url'] and data['requirements'] and data['descriptions']:
                 job_data.append(data)
 
         logger.info(f"Scraping completed. Total jobs scraped: {len(job_data)}")

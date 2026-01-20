@@ -252,7 +252,7 @@ class TopCVScraper:
             except Exception as e:
                 logger.error(f"Error processing job, skipping... {e}")
             
-            if data['url']:
+            if data['url'] and data['requirements'] and data['descriptions'] and data['experience']:
                 job_data.append(data)
             time.sleep(0.5 + random.uniform(0.5, 2.5))
         detail_driver.quit()
