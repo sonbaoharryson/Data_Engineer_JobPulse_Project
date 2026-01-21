@@ -10,7 +10,7 @@ class MinIOConnection:
 
     def _connect_minio(self):
         return Minio(
-            "object-store:9000",
+            "object-store:9000", # change to localhost for local testing
             access_key=os.getenv("MINIO_USER"),
             secret_key=os.getenv("MINIO_PASSWORD"),
             secure=False
@@ -28,13 +28,15 @@ class MinIOConnection:
             self.minio_client.make_bucket(bucket_name)
         try:
             json_string = json.dumps(data_object, ensure_ascii=False)
-            json_bytes = io.BytesIO(json_string.encode('utf-8'))
+            json_bytes_raw = json_string.encode("utf-8")
+            json_bytes = io.BytesIO(json_bytes_raw)
+
             self.minio_client.put_object(
                 bucket_name,
                 destination_file,
                 json_bytes,
-                length=len(json_string),
-                content_type='application/json'
+                length=len(json_bytes_raw),   # ✅ BYTES length
+                content_type="application/json"
             )
         except S3Error as e:
             print(f"Error uploading file: {e}")
