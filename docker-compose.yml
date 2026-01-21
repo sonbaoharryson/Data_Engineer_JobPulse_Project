@@ -28,7 +28,7 @@ x-airflow-common: &airflow-common
 
 services:
   postgresql_db:
-    image: postgres:latest # unchanged from your file
+    image: postgres:16.4 # unchanged from your file
     container_name: postgresql_db
     restart: unless-stopped
     environment:
@@ -72,7 +72,11 @@ services:
     depends_on:
       airflow-webserver:
         condition: service_healthy
-    command: airflow scheduler
+    command: >
+      bash -c "
+      sleep 15 &&
+      airflow scheduler
+      "
     healthcheck:
       test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob"]
       interval: 60s
@@ -104,8 +108,10 @@ services:
       /bin/sh -c "
       until mc alias set minio http://object-store:9000 ${MINIO_USER} ${MINIO_PASSWORD}; do
         sleep 2;
-      done &&
-      mc mb -p minio/warehouse || true
+      done;
+      mc mb -p minio/warehouse || true;
+      mc mb -p minio/crawled-data || true;
+      echo 'MinIO initialization completed';
       "
     # networks:
     #   - discord_network
