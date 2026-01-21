@@ -19,7 +19,7 @@ default_args = {
     dag_id="master_job_elt",
     start_date=datetime(2025, 1, 1),
     catchup=False,
-    schedule='@daily',
+    schedule=None,
     tags=[
         "master_dag",
         "itviec_pipeline",
