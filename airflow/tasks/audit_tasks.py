@@ -3,16 +3,19 @@ import logging
 import traceback
 from datetime import datetime
 from typing import Optional, Dict, Any
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
-from scripts.utils.db_conn import DBConnection
 
 logger = logging.getLogger(__name__)
 
 class AuditLogger:
     """Utility class for logging audit data to audit.master_job_elt_audit table"""
-    
     def __init__(self):
+        from scripts.utils.db_conn import DBConnection
+        from sqlalchemy import text
+        from sqlalchemy.exc import SQLAlchemyError
+
+        self.text = text
+        self.SQLAlchemyError = SQLAlchemyError
+
         self.db_conn = DBConnection()
         self.engine = self.db_conn.engine
     
@@ -185,7 +188,7 @@ class AuditLogger:
                     task_group = additional_metadata['task_group']
             
             # Insert audit record
-            insert_query = text("""
+            insert_query = self.text("""
                 INSERT INTO audit.master_job_elt_audit (
                     dag_run_id, dag_id, execution_date, logical_date, run_type,
                     dag_status, start_date, end_date, duration_seconds,
@@ -279,7 +282,7 @@ class AuditLogger:
                         conn.execute(insert_query, params)
                         trans.commit()
                         logger.info(f"Audit log inserted for task {task_id} with status {task_status}")
-                    except SQLAlchemyError as e:
+                    except self.SQLAlchemyError as e:
                         trans.rollback()
                         logger.error(f"Error inserting audit log: {e}")
             else:
