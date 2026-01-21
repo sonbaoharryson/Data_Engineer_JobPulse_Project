@@ -2,7 +2,6 @@ import os
 import sys
 import logging
 import json
-import datetime as time
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from typing import List, Dict
 
@@ -27,7 +26,7 @@ def upload_crawl_data_to_minio(data:List[Dict], source_crawl:str, bucket_name:st
     from scripts.utils.minio_conn import MinIOConnection
 
     minio_conn = MinIOConnection()
-    destination_file = f"{source_crawl}/{source_crawl}_jobs_{time.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.json"
+    destination_file = f"{source_crawl}/{source_crawl}_jobs.json"
 
     try:
         minio_conn.upload_data_object(bucket_name=bucket_name, destination_file=destination_file, data_object=data)
