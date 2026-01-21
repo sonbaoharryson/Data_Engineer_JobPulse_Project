@@ -9,7 +9,7 @@ until pg_isready \
   -h "$DB_HOST" \
   -p "$DB_PORT" \
   -U "$DB_USER" \
-  -d "$DB_AIRFLOW"; do
+  -d "$DB_NAME"; do
   echo "Postgres not ready yet..."
   sleep 5
 done
@@ -33,5 +33,4 @@ if [ "$ADMIN_EXISTS" -eq "0" ]; then
     --password "$DB_PASSWORD"
 fi
 
-# Execute the command passed as arguments (command webserver will be parsed by the command in docker-compose)
-exec airflow "$@"
+echo "Airflow init completed."
