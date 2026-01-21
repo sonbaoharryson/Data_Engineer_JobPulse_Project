@@ -39,22 +39,13 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# Install matching ChromeDriver for version 134
-RUN wget -q https://storage.googleapis.com/chrome-for-testing-public/134.0.6998.165/linux64/chromedriver-linux64.zip \
-    && unzip chromedriver-linux64.zip -d /usr/local/bin \
-    && mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
-    && chmod +x /usr/local/bin/chromedriver \
-    && rm -rf /usr/local/bin/chromedriver-linux64 chromedriver-linux64.zip
-
 # Expose Chrome & ChromeDriver paths to the runtime via environment variables
 ENV CHROME_BIN=/usr/bin/google-chrome-stable \
-    CHROMEDRIVER_PATH=/usr/local/bin/chromedriver \
     HEADLESS=true \
     PAGE_LOAD_TIMEOUT=30
 
 # Build-time health check to ensure Chrome & chromedriver are present (fail build early if missing)
-RUN if [ ! -x "$CHROME_BIN" ]; then echo "Chrome not found at $CHROME_BIN" >&2; exit 1; fi \
-    && if [ ! -x "$CHROMEDRIVER_PATH" ]; then echo "Chromedriver not found at $CHROMEDRIVER_PATH" >&2; exit 1; fi
+RUN if [ ! -x "$CHROME_BIN" ]; then echo "Chrome not found at $CHROME_BIN" >&2; exit 1; fi
 
 COPY airflow/requirements.txt /requirements.txt
 
