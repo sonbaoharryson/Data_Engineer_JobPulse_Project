@@ -3,11 +3,20 @@ version: "3.9"
 x-airflow-common: &airflow-common
   image: job_warehouse_discord:latest
   restart: unless-stopped
-  environment:
+  environment: &airflow-common-env
     AIRFLOW_HOME: /opt/airflow
-    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor # Using CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
-    AIRFLOW_WEBSERVER_SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
+    AIRFLOW__CELERY__WORKER_CONCURRENCY: 2
+    AIRFLOW__CELERY__WORKER_PREFETCH_MULTIPLIER: 1
+    AIRFLOW__CELERY__TASK_ACKS_LATE: "True"
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW_CONFIG: "/opt/airflow/config/airflow.cfg"
     AIRFLOW_CONN_TRINO_DEFAULT: trino://trino@trino:8080/default
     DBT_TARGET: airflow
     DB_HOST: ${DB_HOST}
@@ -17,12 +26,17 @@ x-airflow-common: &airflow-common
     DB_NAME: ${DB_AIRFLOW}
   volumes:
     - ./airflow/dags:/opt/airflow/dags
-    - ./airflow/config/airflow.cfg:/opt/airflow/airflow.cfg
+    - ./airflow/config/airflow.cfg:/opt/airflow/config/airflow.cfg
     - ./airflow/entrypoint/entrypoint_airflow.sh:/opt/airflow/entrypoint.sh
     - ./airflow/scripts:/opt/airflow/scripts
     - ./airflow/tasks:/opt/airflow/tasks
     - ./airflow/dbt:/opt/airflow/dbt
     - ./.env:/opt/airflow/.env
+  depends_on: &airflow-common-depends-on
+    redis:
+      condition: service_healthy
+    postgresql_db:
+      condition: service_healthy
   # networks:
   #   - discord_network
 
@@ -50,15 +64,38 @@ services:
     # networks:
     #   - discord_network
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    depends_on:
+      <<: *airflow-common-depends-on
+    environment:
+      <<: *airflow-common-env
+    entrypoint: ["/opt/airflow/entrypoint.sh"]
+    restart: "no"
+
   airflow-webserver:
     <<: *airflow-common
     container_name: airflow-webserver
     depends_on:
-      postgresql_db:
-        condition: service_healthy
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
-    entrypoint: ["/opt/airflow/entrypoint.sh"]
     command: webserver
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
@@ -70,18 +107,50 @@ services:
     <<: *airflow-common
     container_name: airflow-scheduler
     depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
       airflow-webserver:
         condition: service_healthy
-    command: >
-      bash -c "
-      sleep 15 &&
-      airflow scheduler
-      "
+    command: scheduler
     healthcheck:
-      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob"]
-      interval: 60s
-      timeout: 30s
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"',
+        ]
+      interval: 30s
+      timeout: 10s
       retries: 5
+      start_period: 30s
+
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker --celery-hostname=%h
+    environment:
+      <<: *airflow-common-env
+      # Required to handle warm shutdown of the celery workers properly
+      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
+      DUMB_INIT_SETSID: "0"
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-webserver:
+        condition: service_healthy
+    healthcheck:
+      # yamllint disable rule:line-length
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      replicas: 2 # Number of worker replicas to run, increase this to create multiple worker containers allowing more parallel task execution
+    mem_swappiness: 0 # Disable swap to prevent slowdowns
+    restart: always
 
   object-store:
     image: minio/minio
