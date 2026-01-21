@@ -13,17 +13,26 @@ PROFILE_DIR = '/opt/airflow/dbt/job_warehouse'
 # task group for itviec pipeline
 @task_group
 def itviec_pipeline():
-    @task
+    @task(
+        on_success_callback=task_success_callback,
+        on_failure_callback=task_failure_callback
+    )
     def load_itviec_url():
         return load_crawl_sources_url(source_crawl="itviec")
 
-    @task
+    @task(
+        on_success_callback=task_success_callback,
+        on_failure_callback=task_failure_callback
+    )
     def scrape_itviec_job(sources: dict):
         return scrape_source_job(sources=sources, source_crawl="itviec")
 
-    @task
+    @task(
+        on_success_callback=task_success_callback,
+        on_failure_callback=task_failure_callback
+    )
     def insert_jobs_itviec(data):
-        return insert_jobs_to_staging_layer(data=data['rows_scraped'], source_crawl="itviec")
+        return insert_jobs_to_staging_layer(data_file_path=data['uploaded_file_path'], source_crawl="itviec")
 
     get_source_task = load_itviec_url()
     scrape_task = scrape_itviec_job(get_source_task)
@@ -34,17 +43,26 @@ def itviec_pipeline():
 # task group for topcv pipeline
 @task_group
 def topcv_pipeline():
-    @task
+    @task(
+        on_success_callback=task_success_callback,
+        on_failure_callback=task_failure_callback
+    )
     def load_topcv_url():
         return load_crawl_sources_url(source_crawl="topcv")
 
-    @task
+    @task(
+        on_success_callback=task_success_callback,
+        on_failure_callback=task_failure_callback
+    )
     def scrape_topcv_job(sources: dict):
         return scrape_source_job(sources=sources, source_crawl="topcv")
 
-    @task
+    @task(
+        on_success_callback=task_success_callback,
+        on_failure_callback=task_failure_callback
+    )
     def insert_jobs_topcv(data):
-        return insert_jobs_to_staging_layer(data=data['rows_scraped'], source_crawl="topcv")
+        return insert_jobs_to_staging_layer(data_file_path=data['uploaded_file_path'], source_crawl="topcv")
 
     get_source_task = load_topcv_url()
     scrape_task = scrape_topcv_job(get_source_task)
