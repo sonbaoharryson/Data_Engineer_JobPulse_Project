@@ -1,4 +1,5 @@
 import time
+import random
 import logging
 from typing import List, Dict, Optional
 from bs4 import BeautifulSoup
@@ -7,6 +8,8 @@ from .helpers.extracting_info import _safe_text, _safe_attr, _safe_find
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 # ---------------- LOGGING ---------------- #
 logging.basicConfig(
@@ -19,7 +22,6 @@ logger = logging.getLogger(__name__)
 class ITViecScraper:
     def __init__(self, headless: bool = True):
         self.headless = headless
-        logger.info("Initializing ChromeDriver...")
         self._driver_path = ChromeDriverManager().install()
 
     # ---------------- DRIVER SETUP ---------------- #
@@ -41,6 +43,7 @@ class ITViecScraper:
         return options
 
     def _init_driver(self) -> webdriver.Chrome:
+        logger.info("Initializing ChromeDriver...")
         return webdriver.Chrome(
             service=Service(self._driver_path),
             options=self._get_chrome_options()
@@ -65,8 +68,8 @@ class ITViecScraper:
 
         logger.info(f"Found {len(jobs)} jobs")
         job_data: List[Dict[str, Optional[str]]] = []
-        job_url = []
 
+        detail_driver = self._init_driver()
         for idx, job in enumerate(jobs, 1):
             logger.info(f"Processing job {idx}/{len(jobs)}")
 
@@ -83,13 +86,15 @@ class ITViecScraper:
             }
 
             try:
-                title_el = _safe_find(job, "h3")
-                data["title"] = _safe_text(title_el)
-
                 url_el = _safe_find(job, "h3", class_="imt-3 text-break")
                 raw_url = _safe_attr(url_el, "data-url")
                 data["url"] = raw_url.split("?lab_feature=")[0] if raw_url else None
 
+                if not data["url"]:
+                    continue
+
+                title_el = _safe_find(job, "h3")
+                data["title"] = _safe_text(title_el)
                 company_el = _safe_find(
                     job, "div", class_="imy-3 d-flex align-items-center"
                 )
@@ -124,12 +129,19 @@ class ITViecScraper:
                     data["tags"] = ", ".join(tags) if tags else None
 
                 # -------- DETAIL PAGE (NEW DRIVER) -------- #
-                if data["url"] and data["url"] not in job_url:
-                    job_url.append(data["url"])
-                    detail_driver = self._init_driver()
+                if data["url"]:
                     try:
                         detail_driver.get(data["url"])
-                        time.sleep(3)
+                        try:
+                            WebDriverWait(detail_driver, 30).until(
+                                lambda d: d.execute_script("return document.body.innerText.length") > 250
+                            )
+                        except TimeoutException:
+                            logger.warning(f"Timeout waiting for job details to load for URL: {data['url']}")
+                            #detail_driver.quit()
+                            time.sleep(0.5 + random.uniform(0.5, 1.5))
+                            continue
+
                         detail_soup = BeautifulSoup(
                             detail_driver.page_source, "html.parser"
                         )
@@ -144,14 +156,17 @@ class ITViecScraper:
                             data["requirements"] = self._extract_text(sections[1])
 
                     finally:
-                        detail_driver.quit()
-                else:
-                    continue
+                        # detail_driver.quit()
+                        detail_driver.delete_all_cookies()
+                        detail_driver.execute_cdp_cmd("Network.clearBrowserCookies", {})
+                        detail_driver.execute_cdp_cmd("Network.clearBrowserCache", {})
+                        time.sleep(0.5 + random.uniform(0.5, 1.5))
             except Exception as e:
                 logger.error(f"Job skipped due to unexpected error: {e}")
             
             if data['url'] and data['requirements'] and data['descriptions']:
                 job_data.append(data)
-
+        detail_driver.quit()
+        
         logger.info(f"Scraping completed. Total jobs scraped: {len(job_data)}")
         return job_data

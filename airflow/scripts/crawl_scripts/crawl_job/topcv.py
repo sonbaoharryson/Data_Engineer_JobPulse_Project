@@ -46,6 +46,7 @@ class TopCVScraper:
     
     def _init_driver(self) -> webdriver.Chrome:
         """Initialize Chrome WebDriver."""
+        logger.info("Initializing ChromeDriver...")
         return webdriver.Chrome(
             service=Service(self._driver_path),
             options=self._get_chrome_options()
@@ -188,24 +189,24 @@ class TopCVScraper:
         
         job_data: List[Dict[str, Optional[str]]] = []
         detail_driver = self._init_driver()
-        job_url_list = []
+
         for idx, job in enumerate(jobs, 1):
+            data = {
+                'title': None,
+                'company': None,
+                'logo': None,
+                'url': None,
+                'location': None,
+                'salary': None,
+                'descriptions': None,
+                'requirements': None,
+                'experience': None,
+                'education': None,
+                'type_of_work': None
+            }
             try:
                 logger.info(f"Processing job {idx}/{len(jobs)}")
-                
-                data = {
-                    'title': None,
-                    'company': None,
-                    'logo': None,
-                    'url': None,
-                    'location': None,
-                    'salary': None,
-                    'descriptions': None,
-                    'requirements': None,
-                    'experience': None,
-                    'education': None,
-                    'type_of_work': None
-                }
+
                 title, company, logo, job_url, location, salary, exp = self._extract_job_info(job)
                 data['title'] = title
                 data['company'] = company
@@ -216,20 +217,17 @@ class TopCVScraper:
                 data['experience'] = exp
 
                 # Create new driver for each job detail to avoid bot detection
-                if job_url and job_url not in job_url_list:
-                    job_url_list.append(job_url)
+                if job_url:
                     try:
                         detail_driver.get(job_url)
-
                         try:
                             WebDriverWait(detail_driver, 30).until(
-                                lambda d: d.execute_script("return document.body.innerText.length") > 500
+                                lambda d: d.execute_script("return document.body.innerText.length") > 250
                             )
-                            time.sleep(1)
                         except TimeoutException:
                             logger.warning(f"Timeout waiting for job details to load for URL: {job_url}")
                             #detail_driver.quit()
-                            time.sleep(0.5 + random.uniform(0.5, 2.5))
+                            time.sleep(0.5 + random.uniform(0.5, 1.5))
                             continue
 
                         job_soup = BeautifulSoup(detail_driver.page_source, "html.parser")
@@ -246,15 +244,16 @@ class TopCVScraper:
                         data['education'] = edu
                         data['type_of_work'] = type_of_work
                     finally:
-                        time.sleep(0.5 + random.uniform(0.5, 2.5))
-                else:
-                    continue
+                        detail_driver.delete_all_cookies()
+                        detail_driver.execute_cdp_cmd("Network.clearBrowserCookies", {})
+                        detail_driver.execute_cdp_cmd("Network.clearBrowserCache", {})
+                        time.sleep(0.5 + random.uniform(0.5, 1.5))
             except Exception as e:
                 logger.error(f"Error processing job, skipping... {e}")
             
             if data['url'] and data['requirements'] and data['descriptions'] and data['experience']:
                 job_data.append(data)
-            time.sleep(0.5 + random.uniform(0.5, 2.5))
+
         detail_driver.quit()
         
         logger.info(f"Scraping completed. Total jobs scraped: {len(job_data)}")
