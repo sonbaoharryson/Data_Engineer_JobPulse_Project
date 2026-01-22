@@ -1,11 +1,15 @@
 version: "3.9"
 
 x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  pull_policy: never
   image: job_warehouse_discord:latest
   restart: unless-stopped
   environment: &airflow-common-env
     AIRFLOW_HOME: /opt/airflow
-    AIRFLOW__CORE__EXECUTOR: CeleryExecutor # Using CeleryExecutor
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor # Upgrade to CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
     AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
@@ -16,7 +20,6 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-    AIRFLOW_CONFIG: "/opt/airflow/config/airflow.cfg"
     AIRFLOW_CONN_TRINO_DEFAULT: trino://trino@trino:8080/default
     DBT_TARGET: airflow
     DB_HOST: ${DB_HOST}
@@ -27,7 +30,6 @@ x-airflow-common: &airflow-common
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/config/airflow.cfg:/opt/airflow/config/airflow.cfg
-    - ./airflow/entrypoint/entrypoint_airflow.sh:/opt/airflow/entrypoint.sh
     - ./airflow/scripts:/opt/airflow/scripts
     - ./airflow/tasks:/opt/airflow/tasks
     - ./airflow/dbt:/opt/airflow/dbt
@@ -42,7 +44,7 @@ x-airflow-common: &airflow-common
 
 services:
   postgresql_db:
-    image: postgres:16.4 # unchanged from your file
+    image: postgres:16.4 # Pin postgres version for compatibility
     container_name: postgresql_db
     restart: unless-stopped
     environment:
@@ -84,7 +86,44 @@ services:
       <<: *airflow-common-depends-on
     environment:
       <<: *airflow-common-env
-    entrypoint: ["/opt/airflow/entrypoint.sh"]
+    command: |
+      bash -c '
+      set -e
+
+      echo "Waiting for database..."
+
+      export PGPASSWORD="$DB_PASSWORD"
+
+      until pg_isready \
+        -h "$DB_HOST" \
+        -p "$DB_PORT" \
+        -U "$DB_USER" \
+        -d "$DB_AIRFLOW"; do
+          echo "Postgres not ready yet..."
+          sleep 5
+      done
+
+      echo "Postgres is ready."
+
+      airflow db migrate
+
+      echo "Checking if admin user exists..."
+
+      ADMIN_EXISTS=$(airflow users list | grep -c "$DB_USER" || wc -l)
+
+      if ! airflow users get "$DB_USER" >/dev/null 2>&1; then
+        echo "Creating admin user..."
+        airflow users create \
+          --username "$DB_USER" \
+          --firstname admin \
+          --lastname admin \
+          --role Admin \
+          --email admin@example.com \
+          --password "$DB_PASSWORD"
+      fi
+
+      echo "Airflow init completed."
+      '
     restart: "no"
 
   airflow-webserver:
