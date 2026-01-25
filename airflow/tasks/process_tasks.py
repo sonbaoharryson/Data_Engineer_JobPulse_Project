@@ -19,6 +19,7 @@ def load_crawl_sources_url(source_crawl:str):
     return data
 
 def upload_crawl_data_to_minio(data:List[Dict], source_crawl:str, bucket_name:str="crawled-data"):
+    import datetime
     if not data:
         logger.info(f"No {source_crawl} jobs to upload to MinIO")
         return {}
@@ -26,7 +27,7 @@ def upload_crawl_data_to_minio(data:List[Dict], source_crawl:str, bucket_name:st
     from scripts.utils.minio_conn import MinIOConnection
 
     minio_conn = MinIOConnection()
-    destination_file = f"{source_crawl}/{source_crawl}_jobs.json"
+    destination_file = f"{source_crawl}/{source_crawl}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_jobs.json"
 
     try:
         minio_conn.upload_data_object(bucket_name=bucket_name, destination_file=destination_file, data_object=data)
