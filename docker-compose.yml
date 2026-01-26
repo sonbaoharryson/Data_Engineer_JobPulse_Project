@@ -6,7 +6,7 @@ x-airflow-common: &airflow-common
     dockerfile: Dockerfile
   pull_policy: never
   image: job_warehouse_discord:latest
-  restart: unless-stopped
+  restart: always
   environment: &airflow-common-env
     AIRFLOW_HOME: /opt/airflow
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor # Upgrade to CeleryExecutor
@@ -46,7 +46,7 @@ services:
   postgresql_db:
     image: postgres:16.4 # Pin postgres version for compatibility
     container_name: postgresql_db
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -69,7 +69,7 @@ services:
   redis:
     image: redis:latest
     container_name: redis
-    restart: unless-stopped
+    restart: always
     ports:
       - "6379:6379"
     healthcheck:
@@ -189,7 +189,6 @@ services:
     deploy:
       replicas: 2 # Number of worker replicas to run, increase this to create multiple worker containers allowing more parallel task execution
     mem_swappiness: 0 # Disable swap to prevent slowdowns
-    restart: always
 
   object-store:
     image: minio/minio
@@ -201,6 +200,7 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    restart: always
     volumes:
       - minio_data:/data
     # networks:
@@ -221,6 +221,7 @@ services:
       mc mb -p minio/crawled-data || true;
       echo 'MinIO initialization completed';
       "
+    restart: "no"
     # networks:
     #   - discord_network
 
@@ -246,6 +247,7 @@ services:
       - "8081:8080"
     volumes:
       - ./trino/catalog:/etc/trino/catalog
+    restart: always
     # networks:
     #   - discord_network
 
