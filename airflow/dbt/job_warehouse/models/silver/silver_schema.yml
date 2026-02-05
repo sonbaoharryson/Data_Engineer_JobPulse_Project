@@ -27,10 +27,15 @@ models:
       - name: job_location
         description: "Job location/city"
       - name: work_model_normalized
-        description: "Normalized work model (Full-time, Remote, Hybrid, On-Site)"
+        description: "Normalized work model (Remote, Hybrid, On-Site)"
         tests:
           - accepted_values:
-              values: ["Full-time", "Part-time", "Remote", "Hybrid", "On-Site"]
+              values: ["Remote", "Hybrid", "On-Site"]
+      - name: work_arrangement_normalized
+        description: "Normalized work arrangement (Full-time, Part-time, Internship)"
+        tests:
+          - accepted_values:
+              values: ["Full-time", "Part-time", "Internship"]
       - name: salary_min_million
         description: "Minimum salary in million VND (TopCV only)"
       - name: salary_max_million
@@ -45,12 +50,6 @@ models:
         description: "Date job was posted"
         tests:
           - not_null
-      - name: days_since_posted
-        description: "Days since job was posted"
-      - name: description_length
-        description: "Length of job description text"
-      - name: requirements_length
-        description: "Length of requirements text"
 
   - name: dim_company
     description: "Company dimension with aggregated hiring metrics"
