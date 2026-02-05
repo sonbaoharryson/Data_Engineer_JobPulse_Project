@@ -11,7 +11,7 @@ SELECT
     least_level_of_education,
     exp AS experience_required,
     created_at
-FROM {{ ref('silver_ingest_itviec') }}
+FROM {{ ref('ingest_itviec') }}
 
 UNION ALL
 
@@ -26,4 +26,4 @@ SELECT
     least_level_of_education,
     exp AS experience_required,
     created_at
-FROM {{ ref('silver_ingest_topcv') }}
+FROM {{ ref('ingest_topcv') }}

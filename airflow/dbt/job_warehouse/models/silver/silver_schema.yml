@@ -1,70 +1,136 @@
 version: 2
 
 models:
-  - name: silver_ingest_itviec
-    description: "Enriched Itviec job postings with parsed education and experience"
+  - name: fact_jobs
+    description: "Unified, cleaned, and enriched job postings fact table"
     columns:
-      - name: url
-        tests: [not_null, unique]
-      - name: title
-        tests: [not_null]
-      - name: company
-        tests: [not_null]
-      - name: least_level_of_education
-        tests: [not_null]
-      - name: exp
-      - name: created_at
-        tests: [not_null]
-
-  - name: silver_ingest_topcv
-    description: "Enriched TopCV job postings with normalized education and experience"
-    columns:
-      - name: url
-        tests: [not_null, unique]
-      - name: title
-        tests: [not_null]
-      - name: company
-        tests: [not_null]
-      - name: least_level_of_education
-        tests: [not_null]
-      - name: exp
-      - name: created_at
-        tests: [not_null]
-
-  - name: silver_jobs_unified
-    description: "Canonical unified job postings across all platforms"
-    columns:
-      - name: source
+      - name: job_id
+        description: "Surrogate key for job posting"
         tests:
           - not_null
-          - accepted_values:
-              values: ["itviec", "topcv"]
-
+      - name: source_platform
+        description: "Job source platform (topcv or itviec)"
+        tests:
+          - not_null
       - name: url
-        tests: [not_null, unique]
+        description: "Unique job posting URL"
+        tests:
+          - not_null
+      - name: job_title
+        description: "Job title (normalized and lowercased)"
+        tests:
+          - not_null
+      - name: company_name
+        description: "Company name (normalized and lowercased)"
+        tests:
+          - not_null
+      - name: job_location
+        description: "Job location/city"
+      - name: work_model_normalized
+        description: "Normalized work model (Full-time, Remote, Hybrid, On-Site)"
+        tests:
+          - accepted_values:
+              values: ["Full-time", "Part-time", "Remote", "Hybrid", "On-Site"]
+      - name: salary_min_million
+        description: "Minimum salary in million VND (TopCV only)"
+      - name: salary_max_million
+        description: "Maximum salary in million VND (TopCV only)"
+      - name: salary_avg_million
+        description: "Average of min and max salary"
+      - name: salary_band
+        description: "Salary band classification"
+      - name: education_level_grouped
+        description: "Normalized education requirement level"
+      - name: job_posted_date
+        description: "Date job was posted"
+        tests:
+          - not_null
+      - name: days_since_posted
+        description: "Days since job was posted"
+      - name: description_length
+        description: "Length of job description text"
+      - name: requirements_length
+        description: "Length of requirements text"
 
-      - name: title
-        tests: [not_null]
-
-      - name: company
-        tests: [not_null]
-
-      - name: least_level_of_education
-        tests: [not_null]
-
-      - name: experience_required
-
-      - name: created_at
-        tests: [not_null]
-
-  - name: silver_dim_company
-    description: "Distinct list of companies"
+  - name: dim_company
+    description: "Company dimension with aggregated hiring metrics"
     columns:
-      - name: company
-        tests: [not_null, unique]
+      - name: company_id
+        description: "Company surrogate key"
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        description: "Company name"
+        tests:
+          - not_null
+      - name: source_platform
+        description: "Platform source"
+      - name: total_job_postings
+        description: "Total jobs posted"
+      - name: num_locations
+        description: "Number of locations hiring"
+      - name: avg_salary_offered
+        description: "Average salary offered"
 
-  - name: silver_dim_location
-    description: "Distinct list of working locations"
+  - name: dim_location
+    description: "Location dimension with job market metrics"
     columns:
-      - name: working_location
-        tests: [not_null, unique]
+      - name: location_id
+        description: "Location surrogate key"
+        tests:
+          - not_null
+          - unique
+      - name: job_location
+        description: "Location name"
+        tests:
+          - not_null
+          - unique
+      - name: total_jobs
+        description: "Total job postings in location"
+      - name: avg_salary_by_location
+        description: "Average salary in location"
+      - name: pct_of_total_jobs
+        description: "Percentage of all jobs in location"
+
+  - name: dim_education
+    description: "Education level dimension with demand metrics"
+    columns:
+      - name: education_id
+        description: "Education level surrogate key"
+      - name: education_requirement
+        description: "Education level requirement"
+      - name: job_count
+        description: "Number of jobs requiring this level"
+      - name: avg_salary
+        description: "Average salary for this education level"
+      - name: pct_of_total_jobs
+        description: "Percentage of all jobs"
+
+  - name: dim_work_model
+    description: "Work model dimension"
+    columns:
+      - name: work_model_id
+        description: "Work model surrogate key"
+      - name: work_model_normalized
+        description: "Work model type"
+      - name: job_count
+        description: "Number of jobs"
+      - name: avg_salary
+        description: "Average salary"
+
+  - name: dim_salary_band
+    description: "Salary band dimension"
+    columns:
+      - name: salary_band_id
+        description: "Salary band surrogate key"
+      - name: salary_band
+        description: "Salary band classification"
+      - name: salary_min_million
+        description: "Minimum salary in band"
+      - name: salary_max_million
+        description: "Maximum salary in band"
+      - name: job_count
+        description: "Number of jobs in band"
+      - name: pct_of_salaried_jobs
+        description: "Percentage of salaried jobs"

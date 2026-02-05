@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: seed
+    database: iceberg
+    schema: bronze
+    tables:
+      - name: vn_city_mapping
+        description: "Seed data for job postings with standardized fields"
