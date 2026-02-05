@@ -17,9 +17,7 @@ default_args = {
     'depends_on_past': False,
     'start_date': datetime(2025, 1, 1),
     'retries': 3,
-    'retry_delay': timedelta(seconds=30),
-    'on_success_callback': task_success_callback,
-    'on_failure_callback': task_failure_callback
+    'retry_delay': timedelta(seconds=30)
 }
 
 @dag(
