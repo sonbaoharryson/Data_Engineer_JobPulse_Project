@@ -16,7 +16,8 @@ WITH topcv_jobs AS (
         b.title,
         b.company,
         {{ location_normalization('b.working_location') }} AS working_location,
-        b.work_model,
+        b.work_model AS work_arrangement,
+        'On-Site' AS work_model,
         b.salary,
         COALESCE(jcm.target_job_category, 'Others') AS job_category,
         {{ min_salary_offered('b.salary') }} AS salary_min_million,
@@ -41,6 +42,7 @@ itviec_jobs AS (
         b.title,
         b.company,
         {{ location_normalization('b.working_location') }} AS working_location,
+        'Full-time' AS work_arrangement,
         b.work_model,
         NULL AS salary,
         COALESCE(jcm.target_job_category, 'Others') AS job_category,
@@ -71,6 +73,7 @@ explode_jobs AS (
         title,
         company,
         work_model,
+        work_arrangement,
         job_category,
         salary,
         salary_min_million,
@@ -93,20 +96,24 @@ enriched AS (
         TO_HEX(MD5(TO_UTF8(CONCAT(source_platform, '|', url)))) AS job_id,
         source_platform,
         url,
-        TRIM(cl.logo_path) AS logo_url,
+        cl.logo_id AS logo_id,
         title AS job_title,
         company AS company_name,
         TRIM(vn_city_mapping.city_en) AS job_location,
         job_category,
         -- Normalize work model
         CASE 
-            WHEN LOWER(TRIM(work_model)) IN ('toàn thời gian', 'full-time', 'full time', 'full-time', 'fulltime') THEN 'Full-time'
-            WHEN LOWER(TRIM(work_model)) IN ('bán thời gian', 'part-time', 'part time') THEN 'Part-time'
             WHEN LOWER(TRIM(work_model)) IN ('hybrid', 'lai') THEN 'Hybrid'
             WHEN LOWER(TRIM(work_model)) IN ('remote', 'từ xa') THEN 'Remote'
             WHEN LOWER(TRIM(work_model)) IN ('at office', 'tại văn phòng', 'on-site', 'on site') THEN 'On-Site'
             ELSE TRIM(work_model)
         END AS work_model_normalized,
+        CASE
+            WHEN LOWER(TRIM(work_arrangement)) IN ('toàn thời gian', 'full-time', 'full time', 'full-time', 'fulltime') THEN 'Full-time'
+            WHEN LOWER(TRIM(work_arrangement)) IN ('bán thời gian', 'part-time', 'part time') THEN 'Part-time'
+            WHEN LOWER(TRIM(work_arrangement)) IN ('thực tập', 'internship', 'intern') THEN 'Internship'
+            ELSE TRIM(work_arrangement)
+        END AS work_arrangement_normalized,
         salary,
         salary_min_million,
         salary_max_million,
