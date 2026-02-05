@@ -6,17 +6,18 @@ CREATE SCHEMA IF NOT EXISTS audit;
 -- TopCV staging table
 CREATE TABLE IF NOT EXISTS job_db_sm4x.staging.topcv_data_job (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(200),
+    title VARCHAR(256),
     company TEXT,
     logo_url TEXT,
     url TEXT UNIQUE NOT NULL,
-    working_location VARCHAR(100),
-    salary VARCHAR(100),
+    job_category VARCHAR(256),
+    working_location VARCHAR(256),
+    salary VARCHAR(256),
     descriptions TEXT,
     requirements TEXT,
     experiences TEXT,
-    level_of_education VARCHAR(100),
-    work_model VARCHAR(50),
+    level_of_education VARCHAR(256),
+    work_model VARCHAR(256),
     posted_to_discord BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -24,12 +25,13 @@ CREATE TABLE IF NOT EXISTS job_db_sm4x.staging.topcv_data_job (
 -- ITviec staging table
 CREATE TABLE IF NOT EXISTS job_db_sm4x.staging.itviec_data_job (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(200),
+    title VARCHAR(256),
     company TEXT,
     logo_url TEXT,
     url TEXT UNIQUE NOT NULL,
-    working_location VARCHAR(100),
-    work_model VARCHAR(50),
+    job_category VARCHAR(256),
+    working_location VARCHAR(256),
+    work_model VARCHAR(256),
     tags TEXT,
     descriptions TEXT,
     requirements_and_experiences TEXT,
@@ -127,4 +129,14 @@ CREATE TABLE IF NOT EXISTS audit.master_job_elt_audit (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_dag_run UNIQUE (dag_run_id, task_id, execution_date)
+);
+
+-- Image table for storing company logos
+CREATE TABLE IF NOT EXISTS job_db_sm4x.staging.company_logos(
+    logo_id TEXT DEFAULT NULL PRIMARY KEY,
+    logo_url TEXT,
+    logo_path TEXT DEFAULT NULL,
+    is_downloaded BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
 );
