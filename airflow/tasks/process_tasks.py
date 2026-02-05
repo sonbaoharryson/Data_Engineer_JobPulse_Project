@@ -151,15 +151,22 @@ def insert_company_logos_to_staging_layer():
 
     try:
         conn = DBConnection()
+        #add LEFT JOIN to filter out existing logos
         query = text(
             """
-            SELECT DISTINCT logo_url
-            FROM staging.itviec_data_job
-            WHERE logo_url IS NOT NULL AND logo_url <> ''
-            UNION
-            SELECT DISTINCT logo_url
-            FROM staging.topcv_data_job
-            WHERE logo_url IS NOT NULL AND logo_url <> ''
+            SELECT logos.logo_url
+            FROM (
+                SELECT DISTINCT logo_url
+                FROM staging.itviec_data_job
+                WHERE logo_url IS NOT NULL AND logo_url <> ''
+                UNION
+                SELECT DISTINCT logo_url
+                FROM staging.topcv_data_job
+                WHERE logo_url IS NOT NULL AND logo_url <> ''
+            ) AS logos
+            LEFT JOIN staging.company_logos AS cl
+            ON logos.logo_url = cl.logo_url
+            WHERE cl.logo_url IS NULL
             """
         )
         with conn.engine.connect() as connection:
