@@ -78,6 +78,7 @@ class ITViecScraper:
                 "company": None,
                 "logo": None,
                 "url": None,
+                "job_cat": None,
                 "location": None,
                 "mode": None,
                 "tags": None,
@@ -145,6 +146,10 @@ class ITViecScraper:
                         detail_soup = BeautifulSoup(
                             detail_driver.page_source, "html.parser"
                         )
+
+                        job_cat_div = detail_soup.find("div", string="Job Expertise:")
+                        
+                        data["job_cat"] = ", ".join([job_cat.text.strip() for job_cat in job_cat_div.find_next("div").find_all("a")]) if job_cat_div else None
 
                         sections = detail_soup.find_all(
                             "div", class_="imy-5 paragraph"

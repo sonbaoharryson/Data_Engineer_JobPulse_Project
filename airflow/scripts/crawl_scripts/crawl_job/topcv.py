@@ -58,7 +58,7 @@ class TopCVScraper:
         company = _safe_text(_safe_find(job, 'a', class_='company'))
         img_tag = job.find('img')
         logo = img_tag.get('src') or img_tag.get('data-src', '')
-        logo = (logo or "").replace('https://cdn-new.topcv.vn/unsafe/150x/', '')
+        logo = (logo or "")
         job_url = _safe_attr(_safe_find(job, 'a'), 'href').split('?ta_source')[0]
         location = _safe_text(_safe_find(job.find('label', class_='address'), 'span'))
         salary = _safe_text(_safe_find(job.find('label', class_='title-salary'), 'span')) or _safe_text(_safe_find(job.find('label', class_='salary'), 'span'))
@@ -231,10 +231,14 @@ class TopCVScraper:
                             continue
 
                         job_soup = BeautifulSoup(detail_driver.page_source, "html.parser")
+
+                        job_cat_div = job_soup.find("div", string=lambda x: x and "Chuyên môn:" in x)
+                        data["job_cat"] = ", ".join([job_cat.text.strip() for job_cat in job_cat_div.find_next("div").find_all("a")]) if job_cat_div else None
                         
                         if 'topcv.vn/brand/' in job_url.strip():
                             descriptions, requirements, edu, type_of_work = self._parse_brand_job(job_soup)
                         elif 'topcv.vn/viec-lam/' in job_url.strip():
+                            job_cat_div = job_soup.find("div", string="Chuyên môn:")
                             descriptions, requirements, edu, type_of_work = self._parse_job_detail(job_soup)
                         else:
                             descriptions = requirements = edu = type_of_work = None
