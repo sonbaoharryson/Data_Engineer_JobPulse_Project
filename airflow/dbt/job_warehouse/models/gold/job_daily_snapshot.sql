@@ -1,8 +1,8 @@
 {{ config(materialized='table') }}
 
 SELECT
-    t_rec_ins_dt,
-    source,
+    dbt_load_timestamp,
+    source_platform,
     COUNT(*) AS total_jobs
-FROM {{ ref('gold_job_fact') }}
+FROM {{ ref('job_fact') }}
 GROUP BY 1, 2
