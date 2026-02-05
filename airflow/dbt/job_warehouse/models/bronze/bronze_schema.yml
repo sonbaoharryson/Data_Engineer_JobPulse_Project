@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: bronze_ingest_itviec
+  - name: itviec_jobs_raw
     description: "Raw ingested job postings from Itviec database"
     columns:
       - name: url
@@ -28,7 +28,7 @@ models:
         tests:
           - not_null
 
-  - name: bronze_ingest_topcv
+  - name: topcv_jobs_raw
     description: "Raw ingested job postings from TopCV database"
     columns:
       - name: url
