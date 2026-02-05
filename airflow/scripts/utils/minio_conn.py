@@ -91,5 +91,4 @@ class MinIOConnection:
         except S3Error as e:
             print(f"Error uploading file: {e}")
         mime = "png" if ext.lower() == "png" else "jpeg"
-        encoded = base64.b64encode(content).decode("utf-8")
-        return f"data:image/{mime};base64,{encoded}"
+        return object_name, mime

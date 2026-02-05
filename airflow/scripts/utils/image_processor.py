@@ -30,19 +30,16 @@ class ImageDownloader:
 
         return results
 
-    def _process_single(self, url: str) -> str:
+    def _process_single(self, url: str) -> bytes:
         """
-        Final output:
-        data:image/png;base64,...
+        Final output: raw bytes of the image
         """
         content = self._download(url)
 
         # Remove background only if needed
         content = self._remove_background_if_needed(content)
 
-        # Convert to base64 (PNG)
-        encoded = base64.b64encode(content).decode("utf-8")
-        return encoded
+        return content
 
     def _download(self, url: str) -> bytes:
         r = self.session.get(url, timeout=self.timeout)
@@ -52,13 +49,11 @@ class ImageDownloader:
     def _remove_background_if_needed(self, content: bytes) -> bytes:
         img = Image.open(BytesIO(content))
 
-        # If already transparent → keep as is
         if img.mode in ("RGBA", "LA"):
             buffer = BytesIO()
             img.save(buffer, format="PNG", optimize=True)
             return buffer.getvalue()
 
-        # Otherwise remove background
         output = remove(content)
 
         out_img = Image.open(BytesIO(output)).convert("RGBA")

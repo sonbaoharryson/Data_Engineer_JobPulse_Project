@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import json
+import base64
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from typing import List, Dict
 
@@ -192,10 +193,12 @@ def download_logos_and_upload_to_minio(data: list[dict]):
         logo_url = logo_item.get('logo_url') if isinstance(logo_item, dict) else logo_item
         try:
             content = image_downloader._process_single(logo_url)
-            object_name = minio_conn.upload_file(bucket_name='crawled-data', source_url=logo_url, content=content)
+            object_name, ext = minio_conn.upload_file(bucket_name='crawled-data', source_url=logo_url, content=content)
+            # Encode content to base64 for the logo_path
+            encoded_content = base64.b64encode(content).decode("utf-8")
             results.append({
                 'logo_url': logo_url,
-                'logo_path': object_name
+                'logo_path': f"data:image/{ext};base64,{encoded_content}"
             })
             logger.info(f"Uploaded logo for {logo_url} to MinIO at {object_name}")
         except Exception as e:
