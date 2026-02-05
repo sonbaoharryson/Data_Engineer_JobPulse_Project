@@ -1,6 +1,10 @@
 from minio import Minio
 from minio.error import S3Error
+from io import BytesIO
 import os
+import hashlib
+import imghdr
+import base64
 from dotenv import load_dotenv
 load_dotenv()
 class MinIOConnection:
@@ -55,3 +59,37 @@ class MinIOConnection:
             if response:
                 response.close()
                 response.release_conn()
+    
+    def upload_file(self, bucket_name: str, source_url: str, content: bytes):
+        def _detect_extension(content: bytes) -> str:
+            img_type = imghdr.what(None, content)
+            if not img_type:
+                raise ValueError("Unknown image type")
+            return img_type
+
+        def _object_name(url: str, ext: str) -> str:
+            h = hashlib.md5(url.encode()).hexdigest()
+            return f"logos/{h}.{ext}"
+
+        """Upload a file to a specified bucket in MinIO"""
+        ext = _detect_extension(content)
+        object_name = _object_name(source_url, ext)
+        try:
+            self.minio_client.bucket_exists(bucket_name)
+        except S3Error as e:
+            print(f"Error checking bucket: {e}")
+            print(f"Creating bucket: {bucket_name}")
+            self.minio_client.make_bucket(bucket_name)
+        try:
+            self.minio_client.put_object(
+                bucket_name,
+                object_name=object_name,
+                data=BytesIO(content),
+                length=len(content),
+                content_type=f"image/{ext}",
+            )
+        except S3Error as e:
+            print(f"Error uploading file: {e}")
+        mime = "png" if ext.lower() == "png" else "jpeg"
+        encoded = base64.b64encode(content).decode("utf-8")
+        return f"data:image/{mime};base64,{encoded}"
