@@ -3,8 +3,7 @@ import sys
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from airflow.decorators import dag
 from datetime import datetime, timedelta
-from tasks.tasks_group import itviec_pipeline, topcv_pipeline, post_job_group, dbt_wh_pipeline
-from tasks.audit_tasks import task_failure_callback, task_success_callback
+from tasks.tasks_group import itviec_pipeline, topcv_pipeline, post_job_group, dbt_wh_pipeline, process_company_logos_group
 
 default_args = {
     "owner": "sonbao",
@@ -34,10 +33,14 @@ def master_elt():
     topcv_insert = topcv_pipeline()
 
     post_tasks = post_job_group()
+    process_image_task = process_company_logos_group()
     bronze_task = dbt_wh_pipeline()
 
     itviec_insert >> post_tasks["itviec"]
     topcv_insert >> post_tasks["topcv"]
+    itviec_insert >> process_image_task["insert_logos"]
+    topcv_insert >> process_image_task["insert_logos"]
+    process_image_task["update_logos"] >> bronze_task
     [itviec_insert, topcv_insert] >> bronze_task
 
 dag = master_elt()

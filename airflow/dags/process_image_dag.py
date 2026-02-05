@@ -2,37 +2,33 @@ import os
 import logging
 import sys
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from airflow.decorators import dag, task
+from airflow.decorators import dag
 from datetime import datetime, timedelta
-from tasks.tasks_group import topcv_pipeline
-from tasks.audit_tasks import task_failure_callback, task_success_callback
+from tasks.tasks_group import process_company_logos_group
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
     logging.basicConfig(level=logging.INFO)
 
-
 #Define DAG
 default_args = {
     'owner': 'sonbao',
     'depends_on_past': False,
-    'start_date': datetime(2025, 3, 1),
+    'start_date': datetime(2025, 1, 1),
     'retries': 3,
     'retry_delay': timedelta(seconds=30)
 }
 
 @dag(
-    dag_id='topcv_pipeline',
+    dag_id='image_processing_pipeline',
     default_args=default_args,
     schedule=None,
     catchup=False,
-    tags=['topcv_pipeline']
+    tags=['image_pipeline']
 )
 
-def _topcv_pipeline():
+def _image_processing_pipeline():
 
-    topcv_pipeline()
-    # insert >> bronze
-    # bronze >> [silver, discord] >> gold
+    process_company_logos_group()
 
-dag = _topcv_pipeline()
+dag = _image_processing_pipeline()
