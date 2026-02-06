@@ -1,8 +1,8 @@
 pattern,target_job_category
 (?i)\b(machine\s*learning|ml engineer|ml engineer)\b,Machine Learning Engineer
-(?i)\b(voice\s*ai|voiceai|ai platform engineer|ai integration engineer|ai engineer|artificial intelligence engineer|computer vision|cv engineer|llmops|nlp|genai)\b,AI Engineer
-(?i)\b(data\s*&\s*ai scientist|ai scientist|data scientist|scientist dữ liệu)\b,Data Scientist
-(?i)\b(data platform engineer|data platform|data engineer|big data engineer|kỹ sư dữ liệu|data pipeline)\b,Data Engineer
-(?i)\b(analytics engineer)\b,Analytics Engineer
+(?i)\b(kỹ sư ai|nlp engineer|cv engineer|natural language processing engineer|kỹ sư công nghệ ai|dev\s*ai|ai\s*developer|voice\s*ai|voiceai|ai platform engineer|ai integration engineer|ai\s*engineer|artificial intelligence engineer|computer vision|cv engineer|llmops|nlp|genai)\b,AI Engineer
+(?i)\b(data\s*&\s*ai scientist|ai scientist|data scientist|scientist dữ liệu|data science)\b,Data Scientist
+(?i)\b(data warehouse engineer|etl engineer|elt egineer|database engineer|data platform engineer|data platform|data engineer|big data engineer|kỹ sư dữ liệu|data pipeline)\b,Data Engineer
+(?i)\b(analytics engineer|analytic engineer)\b,Analytics Engineer
 (?i)\b(bi engineer|business intelligence engineer|power\s*bi|tableau|looker)\b,BI Engineer
 (?i)\b(data analyst|business analyst|\bba\b|phân tích dữ liệu|phân tích nghiệp vụ|phân tích kinh doanh|data analysis|data analytics|data operations analyst|master data analyst|data analyst[_\- ]?python|python/sql)\b,Data Analyst
