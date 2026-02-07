@@ -4,6 +4,8 @@ An end-to-end **Data Engineering project** that automatically crawls job posting
 
 The entire pipeline is orchestrated with **Apache Airflow** and follows the **Medallion Architecture (Bronze → Silver → Gold)** to ensure scalability, data quality, and analytics readiness.
 
+**Power BI** dashboard for job searching and current data market analysis.
+
 > ⚠️ This project is built for **learning, experimentation, and portfolio showcase** purposes.
 
 ---
@@ -19,7 +21,7 @@ The entire pipeline is orchestrated with **Apache Airflow** and follows the **Me
 * 🔄 **Upsert & incremental processing** for efficiency
 * ✅ **Data quality validation** with Great Expectations (pre-staging checks)
 * ✅ **Task Auditting** with custom callback functions, enable task audit performance.
-
+* 📰**Job Analysis** with Power BI.
 ## 🎯 Project Objectives
 
 This project aims to:
@@ -31,12 +33,21 @@ This project aims to:
    * **MinIO + Iceberg** (analytical lakehouse)
 4. Automatically publish **new job alerts to Discord** without duplicates
 5. Transform and model data using **dbt** following Medallion Architecture.
-6. Future enhancement features such as:
+6. Create semantic model for BI consumption and dashboard for data job market analysis.
+7. Future enhancement features such as:
 
    * 🤖 Discord chatbot for job recommendations *(maybe when I’m 60 🤣)*
 
 ---
+## ⚙️ How to set up project
+* Prerequisite: Installed Make and Docker on your machine.
+* **Commands**:
 
+  1. **make up** to start building images and containers.
+  2. **make down** to stop and delete all containers.
+  3. **make clean** to clean whole docker (images, containers, volumes).
+
+---
 ## 🏗️ High-Level Architecture
 
 ```
@@ -73,11 +84,11 @@ This project aims to:
          ▼
 ┌──────────────────────┐
 │ BI / Analytics Tools │
-│ (Coming soon 😅)     │
 └──────────────────────┘
 ```
 
 ![alt text](images/project_architecture.png)
+
 ---
 
 ## 🔄 Data Pipeline Flow
@@ -207,6 +218,15 @@ Basic test scripts are available under `scripts/test/`:
 
 > These tests mainly ensure scripts are **runnable**, not full unit tests.
 
+--
+
+## 📰Data job market analysis
+
+Create semantic models for Power BI consumption. Ingest models into Power BI, create Job Board for job searching purposes, Analysis for overall data market analysis (salary, top demand data job,...).
+This is the report url for your reference: [Link](https://app.powerbi.com/view?r=eyJrIjoiNDQzMjI0MDAtYjA5OS00MDQxLTliNGUtN2UxYzBlYjYyNzQ3IiwidCI6ImY4ZTM0OThkLWQwNjItNDkzYi1hYTBhLWJmMzBhMDk1ZTY0NyIsImMiOjEwfQ%3D%3D)
+
+![alt text](images/semantic_model.png)
+--
 ## 🖥️ Images
 
 - Master dag of JobPulse.
@@ -218,7 +238,11 @@ Basic test scripts are available under `scripts/test/`:
 - Discord jobs post
 ![alt text](images/discord_jobs_post.png)
 
-- ...
+- Job Board
+![alt text](images/pbi_page_1.png)
+
+- Job Analysis
+![alt text](images/pbi_page_2.png)
 
 ## 👤 Author
 **Bao Phan (HarrySon)**

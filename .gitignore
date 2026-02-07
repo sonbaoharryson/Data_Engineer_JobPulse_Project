@@ -12,7 +12,6 @@ logs/
 .user.yml
 profiles.yml
 bot/
-dashboard/
 api/
 Makefile
 dbt/job_warehouse/models/gold/
