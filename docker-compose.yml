@@ -20,7 +20,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-    AIRFLOW_CONN_TRINO_DEFAULT: trino://trino@trino:8080/default
+    AIRFLOW_CONN_TRINO_DEFAULT: trino://trino@trino-coordinator:8080/default
     DBT_TARGET: airflow
     DB_HOST: ${DB_HOST}
     DB_PORT: ${DB_PORT}
@@ -225,16 +225,14 @@ services:
     # networks:
     #   - discord_network
 
-  trino:
+  trino-coordinator:
     image: trinodb/trino:latest
-    container_name: trino
+    container_name: trino-coordinator
     depends_on:
       minio-init:
         condition: service_completed_successfully
       postgresql_db:
         condition: service_healthy
-    env_file:
-      - .env
     environment:
       POSTGRES_HOST: ${DB_HOST}
       POSTGRES_PORT: ${DB_PORT}
@@ -247,15 +245,38 @@ services:
       - "8081:8080"
     volumes:
       - ./trino/catalog:/etc/trino/catalog
+      - ./trino/etc/jvm.config:/etc/trino/jvm.config
+      - ./trino/etc/coordinator/config.properties:/etc/trino/config.properties
+      - ./trino/etc/coordinator/node-coordinator.properties:/etc/trino/node.properties
     restart: always
-    # networks:
-    #   - discord_network
+
+  trino-worker:
+    image: trinodb/trino:latest
+    depends_on:
+      trino-coordinator:
+        condition: service_started
+    environment:
+      POSTGRES_HOST: ${DB_HOST}
+      POSTGRES_PORT: ${DB_PORT}
+      POSTGRES_DB: ${DB_TRINO}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      MINIO_USER: ${MINIO_USER}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+    volumes:
+      - ./trino/catalog:/etc/trino/catalog
+      - ./trino/etc/jvm.config:/etc/trino/jvm.config
+      - ./trino/etc/worker/worker-config.properties:/etc/trino/config.properties
+      - ./trino/etc/worker/node-worker.properties:/etc/trino/node.properties
+    restart: always
+    deploy:
+      replicas: 2
 
   trino-init:
     image: trinodb/trino:latest
     container_name: trino-init
     depends_on:
-      trino:
+      trino-coordinator:
         condition: service_started
       postgresql_db:
         condition: service_healthy
@@ -264,12 +285,12 @@ services:
     entrypoint: >
       /bin/sh -c "
       echo 'Waiting for Trino...';
-      until trino --server http://trino:8080 --execute 'SELECT 1'; do
+      until trino --server http://trino-coordinator:8080 --execute 'SELECT 1'; do
         sleep 3;
       done;
 
       echo 'Running init_schema.sql';
-      trino --server http://trino:8080 --file /init_schema/init_schema.sql;
+      trino --server http://trino-coordinator:8080 --file /init_schema/init_schema.sql;
       echo 'Init schema completed';
       "
     restart: "no"
