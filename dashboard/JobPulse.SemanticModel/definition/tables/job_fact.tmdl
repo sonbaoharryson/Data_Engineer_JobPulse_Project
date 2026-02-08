@@ -1,0 +1,168 @@
+table job_fact
+	lineageTag: 6f8aa202-6a88-4ef9-82a4-538e4d2de578
+
+	column url
+		dataType: string
+		lineageTag: 338819cc-1e55-44bd-9153-d306e5846666
+		dataCategory: WebUrl
+		summarizeBy: none
+		sourceColumn: url
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_category_id
+		dataType: string
+		lineageTag: f37765be-5df8-435f-b82d-ca2006568123
+		summarizeBy: none
+		sourceColumn: job_category_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column company_id
+		dataType: string
+		lineageTag: da13132d-8389-40a3-99e2-1f1303774638
+		summarizeBy: none
+		sourceColumn: company_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_id
+		dataType: string
+		lineageTag: 08a08828-3c3a-4735-81dd-3c50063d58bd
+		summarizeBy: none
+		sourceColumn: job_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column work_model_id
+		dataType: string
+		lineageTag: bec622ac-52bc-4bc9-9074-caa8cc3ca2f8
+		summarizeBy: none
+		sourceColumn: work_model_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column location_id
+		dataType: string
+		lineageTag: 15bce657-9c75-4e55-a422-3c35c873eec1
+		summarizeBy: none
+		sourceColumn: location_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_platform
+		dataType: string
+		lineageTag: 378035c8-b9a9-493a-ac0c-4b6c9dbb635e
+		summarizeBy: none
+		sourceColumn: source_platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_title
+		dataType: string
+		lineageTag: 3bd033f7-fefa-4e7e-8e1b-83f6fa8df794
+		summarizeBy: none
+		sourceColumn: job_title
+
+		annotation SummarizationSetBy = Automatic
+
+	column year_of_experiences
+		dataType: string
+		lineageTag: 2ed5f013-9ffc-402c-8f57-868aa01d8659
+		summarizeBy: none
+		sourceColumn: year_of_experiences
+
+		annotation SummarizationSetBy = Automatic
+
+	column tags
+		dataType: string
+		lineageTag: 280c101e-1258-4ea1-a763-7ecc382cfd85
+		summarizeBy: none
+		sourceColumn: tags
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_posted_date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 393823b4-6b2c-4d45-ba2c-c56f9aae5095
+		summarizeBy: none
+		sourceColumn: job_posted_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column education_id
+		dataType: string
+		lineageTag: 0bfc6176-d4a8-4f82-b05e-cfb3a16bcd50
+		summarizeBy: none
+		sourceColumn: education_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column salary
+		dataType: string
+		lineageTag: 01d4e07f-45e2-4009-ad3c-0944a867bb1b
+		summarizeBy: none
+		sourceColumn: salary
+
+		annotation SummarizationSetBy = Automatic
+
+	column logo_id
+		dataType: string
+		lineageTag: 4cee1309-981b-4289-b665-bda0efa7061f
+		summarizeBy: none
+		sourceColumn: logo_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column work_arrangement_normalized
+		dataType: string
+		lineageTag: 3a730e4c-525b-472d-997f-b66453d40ecf
+		summarizeBy: none
+		sourceColumn: work_arrangement_normalized
+
+		annotation SummarizationSetBy = Automatic
+
+	column experiences_level
+		dataType: string
+		lineageTag: cc3d896e-b2d1-4af1-99b9-fc3b05649d87
+		summarizeBy: none
+		sourceColumn: experiences_level
+
+		annotation SummarizationSetBy = Automatic
+
+	column salary_avg_million
+		dataType: double
+		lineageTag: 86b1ab12-7fef-4f7f-aba8-e6be2a8c6422
+		summarizeBy: sum
+		sourceColumn: salary_avg_million
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_band_id
+		dataType: string
+		lineageTag: 926a6de2-6f22-4fc6-858a-d0482d636210
+		summarizeBy: none
+		sourceColumn: salary_band_id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition job_fact = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_fact_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="job_fact",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_fact_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

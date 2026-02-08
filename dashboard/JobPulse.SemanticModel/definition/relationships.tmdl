@@ -1,0 +1,55 @@
+relationship fbaaac59-ad12-4609-884b-4302a6fb1a36
+	joinOnDateBehavior: datePartOnly
+	fromColumn: company_hiring_summary.first_posting_date
+	toColumn: LocalDateTable_0c6f594b-6c98-43cc-9a7b-f848b6ffd45d.Date
+
+relationship 15a78631-8b33-4b00-8c17-35f28b7e1894
+	joinOnDateBehavior: datePartOnly
+	fromColumn: company_hiring_summary.last_posting_date
+	toColumn: LocalDateTable_899b1893-3c60-47e5-997b-c3cc499c3902.Date
+
+relationship 5d4667fd-015e-6ff4-f225-975d9a568313
+	fromColumn: job_fact.location_id
+	toColumn: location_salary_analysis.location_id
+
+relationship 8c5cb881-a680-92fa-18d6-3082a7109f35
+	fromColumn: job_fact.work_model_id
+	toColumn: work_model_analysis.work_model_id
+
+relationship 43a79528-43f5-5f29-2b52-be2116c3ce54
+	fromColumn: job_fact.company_id
+	toColumn: company_hiring_summary.company_id
+
+relationship 60685837-f2ae-eeff-96bf-d91e1b0c87ed
+	fromColumn: job_fact.job_category_id
+	toColumn: job_category_analysis.job_category_id
+
+relationship AutoDetected_9773436d-db52-47a5-a30b-e1e6aaf9f432
+	fromColumn: job_fact.education_id
+	toColumn: education_distribution.education_id
+
+relationship AutoDetected_8d2cd2b1-240d-4f38-8861-0ead2f9f65b5
+	fromColumn: job_fact.logo_id
+	toColumn: dim_company_logo.logo_id
+
+relationship e88f288e-41e1-40f2-8c09-3893e73214f8
+	joinOnDateBehavior: datePartOnly
+	fromColumn: date_master.date
+	toColumn: LocalDateTable_13246d04-f5a5-4c79-bd7d-e5a6d6877339.Date
+
+relationship 8750a26d-518b-b794-4dcc-da70a572f819
+	fromColumn: job_fact.job_posted_date
+	toColumn: date_master.date
+
+relationship 656e4412-093a-cb26-c181-0572ded3c430
+	fromColumn: job_market_daily.job_posted_date
+	toColumn: date_master.date
+
+relationship 39a8c198-c7aa-fff6-f78d-019ac4fc459c
+	fromColumn: job_daily_snapshot.job_posted_date
+	toColumn: date_master.date
+
+relationship AutoDetected_95c9274a-4ebd-4a13-b3bf-6e627f98cc90
+	fromColumn: job_fact.salary_band_id
+	toColumn: salary_benchmark.salary_band_id
+

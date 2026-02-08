@@ -14,5 +14,5 @@ SELECT
     COUNT(DISTINCT source_platform) AS num_platforms,
     CAST(CURRENT_TIMESTAMP AS TIMESTAMP) AS dbt_load_timestamp
 FROM {{ ref('fact_jobs') }}
+WHERE job_category IS NOT NULL AND job_category != 'Others'
 GROUP BY work_model_normalized
-ORDER BY job_count DESC

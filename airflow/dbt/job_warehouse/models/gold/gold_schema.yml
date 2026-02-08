@@ -55,12 +55,8 @@ models:
   - name: salary_benchmark
     description: "Salary analysis by job title and location"
     columns:
-      - name: job_category
-        description: "Job category/role"
-        tests:
-          - not_null
-      - name: job_location
-        description: "Location"
+      - name: salary_band
+        description: "Salary band"
         tests:
           - not_null
       - name: num_positions

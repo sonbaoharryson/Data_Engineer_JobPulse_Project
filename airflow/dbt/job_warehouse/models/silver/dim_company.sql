@@ -20,4 +20,6 @@ SELECT
     ARRAY_JOIN(ARRAY_AGG(DISTINCT work_model_normalized), ', ') AS work_models_offered,
     CAST(CURRENT_TIMESTAMP AS TIMESTAMP) AS dbt_load_timestamp
 FROM {{ ref('fact_jobs') }}
+WHERE job_category IS NOT NULL
+    AND job_category != 'Others'
 GROUP BY source_platform, company_name

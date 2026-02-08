@@ -1,6 +1,54 @@
 version: 2
 
 models:
+  - name: itviec_base
+    description: "Base model for ITviec job postings with initial cleaning"
+    columns:
+      - name: url
+        description: "Job posting URL"
+        tests:
+          - not_null
+      - name: job_title
+        description: "Job title"
+      - name: company_name
+        description: "Company name"
+      - name: job_location
+        description: "Job location/city"
+      - name: work_model
+        description: "Work model as provided (e.g., Remote, On-site)"
+      - name: work_arrangement
+        description: "Work arrangement as provided (e.g., Full-time, Internship)"
+      - name: education_level
+        description: "Education requirement as provided"
+      - name: job_posted_date
+        description: "Date job was posted"
+
+  - name: topcv_base
+    description: "Base model for TopCV job postings with initial cleaning"
+    columns:
+      - name: url
+        description: "Job posting URL"
+        tests:
+          - not_null
+      - name: job_title
+        description: "Job title"
+      - name: company_name
+        description: "Company name"
+      - name: job_location
+        description: "Job location/city"
+      - name: work_model
+        description: "Work model as provided (e.g., Remote, Hybrid)"
+      - name: work_arrangement
+        description: "Work arrangement as provided (e.g., Full-time, Part-time)"
+      - name: salary_min
+        description: "Minimum salary as provided (in VND)"
+      - name: salary_max
+        description: "Maximum salary as provided (in VND)"
+      - name: education_level
+        description: "Education requirement as provided"
+      - name: job_posted_date
+        description: "Date job was posted"
+
   - name: fact_jobs
     description: "Unified, cleaned, and enriched job postings fact table"
     columns:

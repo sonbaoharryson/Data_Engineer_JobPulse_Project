@@ -18,5 +18,7 @@ SELECT
     CAST(CURRENT_TIMESTAMP AS TIMESTAMP) AS dbt_load_timestamp
 FROM {{ ref('fact_jobs') }}
 WHERE salary_band != 'Not Specified'
+    AND job_category IS NOT NULL
+    AND job_category != 'Others'
 GROUP BY salary_band, salary_min_million, salary_max_million
-ORDER BY salary_min_million DESC NULLS LAST
+--ORDER BY salary_min_million DESC NULLS LAST

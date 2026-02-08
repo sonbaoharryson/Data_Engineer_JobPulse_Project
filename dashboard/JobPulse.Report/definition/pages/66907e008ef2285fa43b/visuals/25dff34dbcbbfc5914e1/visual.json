@@ -1,0 +1,182 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.5.0/schema.json",
+  "name": "25dff34dbcbbfc5914e1",
+  "position": {
+    "x": 796.38826185101573,
+    "y": 398.19413092550786,
+    "z": 2000,
+    "height": 286.04966139954854,
+    "width": 433.95033860045146,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "treemap",
+    "query": {
+      "queryState": {
+        "Details": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "education_distribution"
+                    }
+                  },
+                  "Property": "education_requirement"
+                }
+              },
+              "queryRef": "education_distribution.education_requirement",
+              "nativeQueryRef": "Education Requirement",
+              "displayName": "Education Requirement"
+            }
+          ]
+        },
+        "Group": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "job_fact"
+                    }
+                  },
+                  "Property": "year_of_experiences"
+                }
+              },
+              "queryRef": "job_fact.year_of_experiences",
+              "nativeQueryRef": "Year of Experiences",
+              "active": true,
+              "displayName": "Year of Experiences"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "job_category_analysis"
+                    }
+                  },
+                  "Property": "job_category"
+                }
+              },
+              "queryRef": "job_category_analysis.job_category",
+              "nativeQueryRef": "Job Category",
+              "active": false,
+              "displayName": "Job Category"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "location_salary_analysis"
+                    }
+                  },
+                  "Property": "job_location"
+                }
+              },
+              "queryRef": "location_salary_analysis.job_location",
+              "nativeQueryRef": "Location",
+              "active": false,
+              "displayName": "Location"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "work_model_analysis"
+                    }
+                  },
+                  "Property": "work_model_normalized"
+                }
+              },
+              "queryRef": "work_model_analysis.work_model_normalized",
+              "nativeQueryRef": "Work Model",
+              "active": false,
+              "displayName": "Work Model"
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "job_fact"
+                        }
+                      },
+                      "Property": "salary_avg_million"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(job_fact.salary_avg_million)",
+              "nativeQueryRef": "Salary",
+              "displayName": "Salary"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "job_fact"
+                      }
+                    },
+                    "Property": "salary_avg_million"
+                  }
+                },
+                "Function": 0
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

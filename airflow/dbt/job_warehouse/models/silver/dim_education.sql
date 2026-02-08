@@ -16,5 +16,6 @@ SELECT
     CAST(CURRENT_TIMESTAMP AS TIMESTAMP) AS dbt_load_timestamp
 FROM {{ ref('fact_jobs') }}
 WHERE education_requirement != 'Not Specified'
+    AND job_category IS NOT NULL
+    AND job_category != 'Others'
 GROUP BY education_requirement
-ORDER BY job_count DESC

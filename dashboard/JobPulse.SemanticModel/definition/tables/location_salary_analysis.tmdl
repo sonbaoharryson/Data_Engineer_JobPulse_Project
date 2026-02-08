@@ -1,0 +1,182 @@
+table location_salary_analysis
+	lineageTag: 046efb22-953f-4ce9-93d3-1cde1f33e0f3
+
+	column salary_rank
+		dataType: double
+		lineageTag: 851621f8-9123-4ff7-9e76-ce7335f3fd66
+		summarizeBy: sum
+		sourceColumn: salary_rank
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column location_id
+		dataType: string
+		lineageTag: e89d151d-7b67-44f1-9afc-6d794b84f5f8
+		summarizeBy: none
+		sourceColumn: location_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_location
+		dataType: string
+		lineageTag: 3c2bcb39-a37a-43f5-8480-2855b8d88a32
+		summarizeBy: none
+		sourceColumn: job_location
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_jobs
+		dataType: double
+		lineageTag: 092661f2-b61b-41cd-931f-fa70e68a59bc
+		summarizeBy: sum
+		sourceColumn: total_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_companies
+		dataType: double
+		lineageTag: 3eb4241e-b37c-4a50-896b-45aef8c25f62
+		summarizeBy: sum
+		sourceColumn: num_companies
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_platforms
+		dataType: double
+		lineageTag: 3b467fd5-973a-4840-99f2-71167021caf0
+		summarizeBy: sum
+		sourceColumn: num_platforms
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_of_total_jobs
+		dataType: double
+		lineageTag: 5460b093-98ee-4f89-af20-ca846a27e219
+		summarizeBy: sum
+		sourceColumn: pct_of_total_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_salary_by_location
+		dataType: double
+		lineageTag: 0eec0e6d-789c-447e-9b02-8fe572cb878d
+		summarizeBy: sum
+		sourceColumn: avg_salary_by_location
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column remote_jobs
+		dataType: double
+		lineageTag: daf2423d-befa-4988-a15c-a1acb8f67b8b
+		summarizeBy: sum
+		sourceColumn: remote_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column hybrid_jobs
+		dataType: double
+		lineageTag: 55b9547e-a5d9-4e46-bdcf-db942e92ca8a
+		summarizeBy: sum
+		sourceColumn: hybrid_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column onsite_jobs
+		dataType: double
+		lineageTag: 0826af73-0222-4dc6-9bec-3d6f7d2fec20
+		summarizeBy: sum
+		sourceColumn: onsite_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fulltime_jobs
+		dataType: double
+		lineageTag: 5827c683-3383-42a5-a672-4d8943f23f03
+		summarizeBy: sum
+		sourceColumn: fulltime_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_remote
+		dataType: double
+		lineageTag: 7e945af5-c961-475a-9148-e27f2f231cd6
+		summarizeBy: sum
+		sourceColumn: pct_remote
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_hybrid
+		dataType: double
+		lineageTag: 140aa943-66aa-413f-ab61-78369e9724e4
+		summarizeBy: sum
+		sourceColumn: pct_hybrid
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column education_requirements
+		dataType: string
+		lineageTag: fae4f90d-ad3e-4d3e-979d-3b50169f0fe3
+		summarizeBy: none
+		sourceColumn: education_requirements
+
+		annotation SummarizationSetBy = Automatic
+
+	column highest_salary
+		dataType: double
+		lineageTag: fce8f655-3676-406a-a105-56a83eb167da
+		summarizeBy: sum
+		sourceColumn: highest_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column lowest_salary
+		dataType: double
+		lineageTag: 7011c05c-cca6-40e8-9cec-252b727536c4
+		summarizeBy: sum
+		sourceColumn: lowest_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition location_salary_analysis = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_location_salary_analysis_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="location_salary_analysis",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_location_salary_analysis_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

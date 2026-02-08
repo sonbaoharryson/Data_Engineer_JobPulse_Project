@@ -1,0 +1,172 @@
+table company_hiring_summary
+	lineageTag: 1ad39b2a-d66a-4ce5-af80-75420912d5e1
+
+	column company_rank
+		dataType: double
+		lineageTag: 3f61f7d2-9056-4539-b51b-f904182ff6d2
+		summarizeBy: sum
+		sourceColumn: company_rank
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column company_name
+		dataType: string
+		lineageTag: 797da463-a7c7-4d3a-b00f-6ee8446e98e9
+		summarizeBy: none
+		sourceColumn: company_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_platform
+		dataType: string
+		lineageTag: d6878c7c-ed73-41dc-bed6-268e1f225aef
+		summarizeBy: none
+		sourceColumn: source_platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_job_postings
+		dataType: double
+		lineageTag: a773930d-3c32-40ae-8c1c-02c29c0bd3c2
+		summarizeBy: sum
+		sourceColumn: total_job_postings
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_locations
+		dataType: double
+		lineageTag: b0ae6c37-830a-4bb7-baf4-cb1d10e160d5
+		summarizeBy: sum
+		sourceColumn: num_locations
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column discord_postings
+		dataType: double
+		lineageTag: 6fa2720b-e5ad-4c3c-9a5f-f71f0c2b177e
+		summarizeBy: sum
+		sourceColumn: discord_postings
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_discord_posted
+		dataType: double
+		lineageTag: e560f080-8d18-40ca-a00c-7761ef1c2909
+		summarizeBy: sum
+		sourceColumn: pct_discord_posted
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column active_days_range
+		dataType: double
+		lineageTag: 2db5fd09-7d01-4766-bdb3-3c8825da7632
+		summarizeBy: sum
+		sourceColumn: active_days_range
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column first_posting_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f4ebb8c4-9fc1-40f7-892c-94f3482b3cca
+		summarizeBy: none
+		sourceColumn: first_posting_date
+
+		variation Variation
+			isDefault
+			relationship: fbaaac59-ad12-4609-884b-4302a6fb1a36
+			defaultHierarchy: LocalDateTable_0c6f594b-6c98-43cc-9a7b-f848b6ffd45d.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column last_posting_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 6728bb53-0e4a-412a-ab77-2da33d979c4c
+		summarizeBy: none
+		sourceColumn: last_posting_date
+
+		variation Variation
+			isDefault
+			relationship: 15a78631-8b33-4b00-8c17-35f28b7e1894
+			defaultHierarchy: LocalDateTable_899b1893-3c60-47e5-997b-c3cc499c3902.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column avg_salary_offered
+		dataType: double
+		lineageTag: feebe2ae-65c6-4616-a960-5bf570a55d4c
+		summarizeBy: sum
+		sourceColumn: avg_salary_offered
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column unique_locations_hiring
+		dataType: double
+		lineageTag: 1a8a8569-1317-4240-8eb8-7fd1f6d27042
+		summarizeBy: sum
+		sourceColumn: unique_locations_hiring
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column unique_job_titles
+		dataType: double
+		lineageTag: 976f43e8-8b53-4ee0-8988-c69ef1bdd421
+		summarizeBy: sum
+		sourceColumn: unique_job_titles
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column work_models_offered
+		dataType: string
+		lineageTag: 9987789b-c026-4b0a-a411-79f78e50d64f
+		summarizeBy: none
+		sourceColumn: work_models_offered
+
+		annotation SummarizationSetBy = Automatic
+
+	column company_id
+		dataType: string
+		lineageTag: ad630f69-4657-4b6a-a0b4-d53aef43e4f9
+		summarizeBy: none
+		sourceColumn: company_id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition company_hiring_summary = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_company_hiring_summary_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="company_hiring_summary",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_company_hiring_summary_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
