@@ -22,4 +22,6 @@ SELECT
     ARRAY_JOIN(ARRAY_AGG(DISTINCT education_requirement), ', ') AS education_requirements,
     CAST(CURRENT_TIMESTAMP AS TIMESTAMP) AS dbt_load_timestamp
 FROM {{ ref('fact_jobs') }}
+WHERE job_category IS NOT NULL
+    AND job_category != 'Others'
 GROUP BY job_location, TO_HEX(MD5(TO_UTF8(job_location)))

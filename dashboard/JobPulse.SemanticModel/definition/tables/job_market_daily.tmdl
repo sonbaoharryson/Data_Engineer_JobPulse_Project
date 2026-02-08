@@ -1,0 +1,167 @@
+table job_market_daily
+	lineageTag: 6f7e5b2c-9ce2-4f98-8b6a-00599553d0d5
+
+	column job_posted_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: efe35e16-0345-4070-bf71-b33ee5f08296
+		summarizeBy: none
+		sourceColumn: job_posted_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column source_platform
+		dataType: string
+		lineageTag: 8f29bac7-f75e-4aea-9869-5e70efcb1e1a
+		summarizeBy: none
+		sourceColumn: source_platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column daily_job_postings
+		dataType: double
+		lineageTag: 7dec3768-42fc-41bb-b3c7-dfda9bbf2106
+		summarizeBy: sum
+		sourceColumn: daily_job_postings
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column unique_companies_posting
+		dataType: double
+		lineageTag: ad80c295-7b2a-4a2a-b365-3eeb2eb64a84
+		summarizeBy: sum
+		sourceColumn: unique_companies_posting
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column unique_locations
+		dataType: double
+		lineageTag: 723e735b-c451-4b0a-9bff-bf1f25e6a5ff
+		summarizeBy: sum
+		sourceColumn: unique_locations
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column discord_posted_count
+		dataType: double
+		lineageTag: 5b477ba7-cff5-4262-8822-14362fd230dc
+		summarizeBy: sum
+		sourceColumn: discord_posted_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_posted_to_discord
+		dataType: double
+		lineageTag: ac8491e8-e041-4107-8ea5-8549b735399c
+		summarizeBy: sum
+		sourceColumn: pct_posted_to_discord
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_salary_offered
+		dataType: double
+		lineageTag: cf00f78d-a7b9-438e-bdd7-9856b6bbe1b4
+		summarizeBy: sum
+		sourceColumn: avg_salary_offered
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column max_salary_offered
+		dataType: double
+		lineageTag: ff03039b-2575-42ec-a4c6-f2034c54aeec
+		summarizeBy: sum
+		sourceColumn: max_salary_offered
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column min_salary_offered
+		dataType: double
+		lineageTag: 7336dffa-9849-432d-be62-78947abf341e
+		summarizeBy: sum
+		sourceColumn: min_salary_offered
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column remote_jobs
+		dataType: double
+		lineageTag: e7714a4f-ba17-4deb-afb1-cdb720a5c98c
+		summarizeBy: sum
+		sourceColumn: remote_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column hybrid_jobs
+		dataType: double
+		lineageTag: acccaf95-86f1-42e6-8655-3e1e00fa281a
+		summarizeBy: sum
+		sourceColumn: hybrid_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fulltime_jobs
+		dataType: double
+		lineageTag: 17a90005-1d6b-4d6b-852c-dc8f8b5e63b7
+		summarizeBy: sum
+		sourceColumn: fulltime_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column onsite_jobs
+		dataType: double
+		lineageTag: b4d3bf6c-fc37-4014-8d08-ffbec5285f75
+		summarizeBy: sum
+		sourceColumn: onsite_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column bachelor_required_count
+		dataType: double
+		lineageTag: 70ce91d5-d980-43ae-8c09-fb81b1f25793
+		summarizeBy: sum
+		sourceColumn: bachelor_required_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition job_market_daily = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_market_daily_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="job_market_daily",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_market_daily_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

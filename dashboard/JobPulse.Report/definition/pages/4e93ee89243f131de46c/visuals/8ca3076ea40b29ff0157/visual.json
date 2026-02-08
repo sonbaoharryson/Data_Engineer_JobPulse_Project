@@ -1,0 +1,31 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.5.0/schema.json",
+  "name": "8ca3076ea40b29ff0157",
+  "position": {
+    "x": 484.334085778781,
+    "y": 37.043596916341293,
+    "z": 1000,
+    "height": 38.414629765714331,
+    "width": 764.93376278549579,
+    "tabOrder": 2000
+  },
+  "visualGroup": {
+    "displayName": "Filter Title",
+    "groupMode": "ScaleMode",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Searching jobs by title!'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

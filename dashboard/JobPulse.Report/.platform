@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "JobPulse"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "3b6a8c3d-a14f-4903-a05e-9781f695364c"
+  }
+}

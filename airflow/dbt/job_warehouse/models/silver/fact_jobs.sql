@@ -1,69 +1,12 @@
 {{ config(
     materialized='table',
-    tags=['silver_layer', 'fact_table'],
-    indexes=[
-        {'columns': ['source_platform', 'job_posted_date'], 'type': 'btree'},
-        {'columns': ['company_name'], 'type': 'hash'},
-        {'columns': ['job_location'], 'type': 'hash'}
-    ]
+    tags=['silver_layer', 'fact_table', 'heavy_compute']
 ) }}
 
-WITH topcv_jobs AS (
-    SELECT
-        'topcv' AS source_platform,
-        b.url,
-        b.logo_url,
-        b.title,
-        b.company,
-        {{ location_normalization('b.working_location') }} AS working_location,
-        b.work_model AS work_arrangement,
-        'On-Site' AS work_model,
-        b.salary,
-        COALESCE(jcm.target_job_category, 'Others') AS job_category,
-        {{ min_salary_offered('b.salary') }} AS salary_min_million,
-		{{ max_salary_offered('b.salary') }} AS salary_max_million,
-        {{ least_level_of_education('b.level_of_education') }} AS education_requirement,
-        b.descriptions,
-        b.requirements,
-        {{ extract_experience('b.experiences') }} AS year_of_experiences,
-        COALESCE(b.job_category, NULL) AS tags,
-        b.posted_to_discord,
-        CAST(b.created_at AS DATE) AS job_posted_date,
-        b.created_at AS job_posted_timestamp
-    FROM {{ ref('topcv_jobs_raw') }} b
-    LEFT JOIN {{ ref('job_category_mapping') }} jcm
-        ON REGEXP_LIKE(lower(b.title), jcm.pattern)
-),
-itviec_jobs AS (
-    SELECT
-        'itviec' AS source_platform,
-        b.url,
-        b.logo_url,
-        b.title,
-        b.company,
-        {{ location_normalization('b.working_location') }} AS working_location,
-        'Full-time' AS work_arrangement,
-        b.work_model,
-        NULL AS salary,
-        COALESCE(jcm.target_job_category, 'Others') AS job_category,
-        NULL AS salary_min_million,
-        NULL AS salary_max_million,
-        {{ least_level_of_education('requirements_and_experiences') }} AS education_requirement,
-        b.descriptions,
-        b.requirements_and_experiences AS requirements,
-        {{ extract_experience('b.requirements_and_experiences') }} AS year_of_experiences,
-        b.tags,
-        b.posted_to_discord,
-        CAST(b.created_at AS DATE) AS job_posted_date,
-        b.created_at AS job_posted_timestamp
-    FROM {{ ref('itviec_jobs_raw') }} b
-    LEFT JOIN {{ ref('job_category_mapping') }} jcm
-        ON REGEXP_LIKE(lower(b.title), jcm.pattern)
-),
-unified_jobs AS (
-    SELECT * FROM topcv_jobs
+WITH unified_jobs AS (
+    SELECT * FROM {{ ref('topcv_base') }}
     UNION ALL
-    SELECT * FROM itviec_jobs
+    SELECT * FROM {{ ref('itviec_base') }}
 ),
 explode_jobs AS (
     SELECT
@@ -122,7 +65,10 @@ enriched AS (
         education_requirement,
         descriptions,
         requirements,
-        year_of_experiences,
+        year_of_experiences year_of_experiences_raw,
+        {{ yoe_normalized('year_of_experiences') }} AS year_of_experiences_normalized,
+        {{ yoe_band(yoe_normalized('year_of_experiences')) }} AS year_of_experiences,
+        {{ yoe_level(yoe_normalized('year_of_experiences')) }} AS experiences_level,
         tags,
         posted_to_discord,
         job_posted_date,

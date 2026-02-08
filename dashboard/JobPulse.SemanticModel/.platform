@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "JobPulse"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "e2f8f269-5527-47b2-84f7-121ec9a41cf2"
+  }
+}

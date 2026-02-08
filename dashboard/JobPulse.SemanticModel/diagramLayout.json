@@ -1,0 +1,178 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 279.62962962962962
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 966.16991548919486,
+            "y": 1437.9265903901064
+          },
+          "nodeIndex": "company_hiring_summary",
+          "nodeLineageTag": "1ad39b2a-d66a-4ce5-af80-75420912d5e1",
+          "size": {
+            "height": 493.33333333333326,
+            "width": 234
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 681.116128412578,
+            "y": 170.57679979176208
+          },
+          "nodeIndex": "education_distribution",
+          "nodeLineageTag": "669222fb-50dd-4351-b823-497d8c112d29",
+          "size": {
+            "height": 420,
+            "width": 234
+          },
+          "zIndex": 9
+        },
+        {
+          "location": {
+            "x": 105.91222969423615,
+            "y": 561.64263710657917
+          },
+          "nodeIndex": "job_daily_snapshot",
+          "nodeLineageTag": "67a05669-5859-4098-827c-550de05804b8",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 1020.8793324096964,
+            "y": 624.14301402158515
+          },
+          "nodeIndex": "job_fact",
+          "nodeLineageTag": "6f8aa202-6a88-4ef9-82a4-538e4d2de578",
+          "size": {
+            "height": 545,
+            "width": 234
+          },
+          "zIndex": 11
+        },
+        {
+          "location": {
+            "x": 111.8210248612412,
+            "y": 790.23415373284786
+          },
+          "nodeIndex": "job_market_daily",
+          "nodeLineageTag": "6f7e5b2c-9ce2-4f98-8b6a-00599553d0d5",
+          "size": {
+            "height": 510,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 1450.0712884225245,
+            "y": 737.87921199038249
+          },
+          "nodeIndex": "location_salary_analysis",
+          "nodeLineageTag": "046efb22-953f-4ce9-93d3-1cde1f33e0f3",
+          "size": {
+            "height": 546.66666666666674,
+            "width": 234
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 726.564355905052,
+            "y": 1372.914839713198
+          },
+          "nodeIndex": "salary_benchmark",
+          "nodeLineageTag": "a9c740d3-b453-45b5-bb57-8e582433f414",
+          "size": {
+            "height": 476.66666666666674,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 1443.1378580953246,
+            "y": 1310.9044884938439
+          },
+          "nodeIndex": "work_model_analysis",
+          "nodeLineageTag": "b2f7785f-e4b9-4fae-ad32-089427cd7c3d",
+          "size": {
+            "height": 440,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 1457.0361631800702,
+            "y": 265.33626684737277
+          },
+          "nodeIndex": "job_category_analysis",
+          "nodeLineageTag": "8d9708ff-a5ea-4bef-8f35-1fdb55dcbbbb",
+          "size": {
+            "height": 446.66666666666669,
+            "width": 234
+          },
+          "zIndex": 10
+        },
+        {
+          "location": {
+            "x": 543.58359689461656,
+            "y": 849.50628920968029
+          },
+          "nodeIndex": "date_master",
+          "nodeLineageTag": "6d614207-1444-4dee-937a-d896cf893cb2",
+          "size": {
+            "height": 266.66666666666652,
+            "width": 234
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 995.50949912041563,
+            "y": 336.12127224494111
+          },
+          "nodeIndex": "dim_company_logo",
+          "nodeLineageTag": "480dd5b9-c841-45ad-be06-14462d9f9948",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 1635.123933485834,
+            "y": 885.20049522975955
+          },
+          "nodeIndex": "Measure Table",
+          "nodeLineageTag": "f4a42d8c-5198-4723-87ea-971331d950cd",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 54,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

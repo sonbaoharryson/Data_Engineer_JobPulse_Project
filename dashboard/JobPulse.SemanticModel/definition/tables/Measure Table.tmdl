@@ -1,0 +1,25 @@
+table 'Measure Table'
+	lineageTag: f4a42d8c-5198-4723-87ea-971331d950cd
+
+	measure 'Avg Salary' = IF(AVERAGE(job_fact[salary_avg_million])=0, "Unkown", AVERAGE(job_fact[salary_avg_million]))
+		formatString: #,0\ "₫";-#,0\ "₫";#,0\ "₫"
+		lineageTag: c355e5f2-864e-4ba5-90e5-c6106da83721
+
+		annotation PBI_FormatHint = {"currencyCulture":"vi-VN"}
+
+	measure 'Avg Salary -' = AVERAGE(job_fact[salary_avg_million])
+		lineageTag: 7521569e-bd31-4c1f-83a8-750233424cfa
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'Measure Table' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Removed Columns" = Table.RemoveColumns(Source,{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+

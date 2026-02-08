@@ -1,0 +1,47 @@
+table job_daily_snapshot
+	lineageTag: 67a05669-5859-4098-827c-550de05804b8
+
+	column total_jobs
+		dataType: double
+		lineageTag: 9470b22e-8033-42b4-a42f-9d444e716a79
+		summarizeBy: sum
+		sourceColumn: total_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column source_platform
+		dataType: string
+		lineageTag: 0f31f22f-6910-4ae2-974c-95595e1b8c5e
+		summarizeBy: none
+		sourceColumn: source_platform
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_posted_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a2020988-cccf-4320-88c0-b615ac2fba01
+		summarizeBy: none
+		sourceColumn: job_posted_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition job_daily_snapshot = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_daily_snapshot_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="job_daily_snapshot",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_daily_snapshot_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

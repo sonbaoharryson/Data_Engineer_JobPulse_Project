@@ -1,0 +1,132 @@
+table education_distribution
+	lineageTag: 669222fb-50dd-4351-b823-497d8c112d29
+
+	column education_id
+		dataType: string
+		lineageTag: a835cbf1-191e-48c6-b7d9-bdb96e73fdb1
+		summarizeBy: none
+		sourceColumn: education_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_count
+		dataType: double
+		lineageTag: c743335f-3f80-4e33-8d45-bca85912d55d
+		summarizeBy: sum
+		sourceColumn: job_count
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_companies
+		dataType: double
+		lineageTag: f6141d0e-28d9-4fa2-aa0b-9420146de138
+		summarizeBy: sum
+		sourceColumn: num_companies
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_locations
+		dataType: double
+		lineageTag: 6e00ff7e-87a0-418d-9cf4-aad08bc55d0e
+		summarizeBy: sum
+		sourceColumn: num_locations
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_salary
+		dataType: double
+		lineageTag: bcbb8ae2-f504-4249-9de5-719ebcb353c7
+		summarizeBy: sum
+		sourceColumn: avg_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_of_total_jobs
+		dataType: double
+		lineageTag: ba4b61b9-1f26-404b-b02d-ca3e1951002e
+		summarizeBy: sum
+		sourceColumn: pct_of_total_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column source_platforms
+		dataType: string
+		lineageTag: 6c206e81-a7ea-4a88-97d9-706c904aa82c
+		summarizeBy: none
+		sourceColumn: source_platforms
+
+		annotation SummarizationSetBy = Automatic
+
+	column demand_rank
+		dataType: double
+		lineageTag: 37892d8c-a6bd-4a61-9f65-593eb0a5bee9
+		summarizeBy: sum
+		sourceColumn: demand_rank
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column market_avg_salary
+		dataType: double
+		lineageTag: 451ce150-c3c9-4bcf-8ed8-e61d806f14a6
+		summarizeBy: sum
+		sourceColumn: market_avg_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_vs_market
+		dataType: double
+		lineageTag: a1b1982b-d078-4b1e-bb4e-1fd7bd1c8acc
+		summarizeBy: sum
+		sourceColumn: salary_vs_market
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_vs_market_pct
+		dataType: double
+		lineageTag: 7d43ff01-a707-4d68-82f0-71c999be7fa6
+		summarizeBy: sum
+		sourceColumn: salary_vs_market_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column education_requirement
+		dataType: string
+		lineageTag: 0ec4246f-4dcc-45b8-b615-ebadd65891a3
+		summarizeBy: none
+		sourceColumn: education_requirement
+
+		annotation SummarizationSetBy = Automatic
+
+	partition education_distribution = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_education_distribution_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="education_distribution",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_education_distribution_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

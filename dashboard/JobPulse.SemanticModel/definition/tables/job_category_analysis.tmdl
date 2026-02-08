@@ -1,0 +1,144 @@
+table job_category_analysis
+	lineageTag: 8d9708ff-a5ea-4bef-8f35-1fdb55dcbbbb
+
+	column title_rank
+		dataType: double
+		lineageTag: 45d71dd7-c0a1-46cc-a8e6-0b6f258fdb6a
+		summarizeBy: sum
+		sourceColumn: title_rank
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_positions
+		dataType: double
+		lineageTag: 37f46b3d-48cd-432d-8133-47aa3906468a
+		summarizeBy: sum
+		sourceColumn: num_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_companies
+		dataType: double
+		lineageTag: 9e47ed57-4a0f-4282-83af-28433f47e21b
+		summarizeBy: sum
+		sourceColumn: num_companies
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_locations
+		dataType: double
+		lineageTag: b57e6d11-950f-4bd6-9530-645fdcc8af9f
+		summarizeBy: sum
+		sourceColumn: num_locations
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_of_all_jobs
+		dataType: double
+		lineageTag: 75a50e80-45bc-4e3e-bf4b-94c75f742bcb
+		summarizeBy: sum
+		sourceColumn: pct_of_all_jobs
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_salary
+		dataType: double
+		lineageTag: 5307ef13-4638-4ecf-b2be-5fd1013471a3
+		summarizeBy: sum
+		sourceColumn: avg_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column min_salary
+		dataType: double
+		lineageTag: 4c86a8be-bc01-4184-bbca-60a6596d2086
+		summarizeBy: sum
+		sourceColumn: min_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column max_salary
+		dataType: double
+		lineageTag: eb8524ec-1704-4197-a5d0-f3d264913cd1
+		summarizeBy: sum
+		sourceColumn: max_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column remote_positions
+		dataType: double
+		lineageTag: e2205a20-cdba-4bff-b1c6-0d20917c8bca
+		summarizeBy: sum
+		sourceColumn: remote_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column hybrid_positions
+		dataType: double
+		lineageTag: e5eefd83-7052-4bc3-9231-eac3de41da87
+		summarizeBy: sum
+		sourceColumn: hybrid_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_bachelor_required
+		dataType: double
+		lineageTag: daa577e9-3998-4369-b86d-eaa5aeed0d44
+		summarizeBy: sum
+		sourceColumn: pct_bachelor_required
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column job_category_id
+		dataType: string
+		lineageTag: 68ba8423-e107-44b1-8eae-9ea016dcce85
+		summarizeBy: none
+		sourceColumn: job_category_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_category
+		dataType: string
+		lineageTag: a68a2b15-22eb-4ccf-bd9c-10aaa94a726d
+		summarizeBy: none
+		sourceColumn: job_category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition job_category_analysis = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_title_analysis_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="job_category_analysis",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_job_title_analysis_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

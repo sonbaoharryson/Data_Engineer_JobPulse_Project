@@ -1,0 +1,16 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.5.0/schema.json",
+  "name": "5152e98f4863095be4dc",
+  "position": {
+    "x": 159.27765237020316,
+    "y": 361.063769751693,
+    "z": 3000,
+    "height": 334.55699774266361,
+    "width": 186.90744920993228,
+    "tabOrder": 1000
+  },
+  "visualGroup": {
+    "displayName": "Filter Job Board",
+    "groupMode": "ScaleMode"
+  }
+}

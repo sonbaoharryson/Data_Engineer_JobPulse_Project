@@ -1,0 +1,33 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["company_hiring_summary","education_distribution","job_daily_snapshot","job_fact","work_model_analysis","salary_benchmark","location_salary_analysis","job_market_daily","job_category_analysis","date_master","dim_company_logo","Measure Table"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table company_hiring_summary
+ref table DateTableTemplate_0e848566-1914-42f7-bfb9-2ef580d0290d
+ref table LocalDateTable_0c6f594b-6c98-43cc-9a7b-f848b6ffd45d
+ref table LocalDateTable_899b1893-3c60-47e5-997b-c3cc499c3902
+ref table education_distribution
+ref table job_daily_snapshot
+ref table job_fact
+ref table work_model_analysis
+ref table salary_benchmark
+ref table location_salary_analysis
+ref table job_market_daily
+ref table job_category_analysis
+ref table date_master
+ref table dim_company_logo
+ref table LocalDateTable_13246d04-f5a5-4c79-bd7d-e5a6d6877339
+ref table 'Measure Table'
+
+ref cultureInfo en-US
+

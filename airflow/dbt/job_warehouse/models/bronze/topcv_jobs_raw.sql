@@ -13,7 +13,7 @@ SELECT
     TRIM(url) AS url,
     job_category,
     {{ initcap_and_trim('working_location') }} AS working_location,
-    {{ initcap_and_trim('salary') }} AS salary,
+    REPLACE({{ initcap_and_trim('salary') }}, ',', '') AS salary,
     {{ lower_and_trim('descriptions') }} AS descriptions,
     {{ lower_and_trim('requirements') }} AS requirements,
     {{ lower_and_trim('experiences') }} AS experiences,

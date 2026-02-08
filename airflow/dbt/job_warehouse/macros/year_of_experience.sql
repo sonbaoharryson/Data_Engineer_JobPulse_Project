@@ -65,3 +65,84 @@ CASE
 END
 
 {% endmacro %}
+
+{% macro yoe_normalized(col) %}
+
+CASE
+    -- normalize first: lowercase + normalize dash
+    WHEN {{ col }} IS NULL THEN NULL
+    WHEN lower({{ col }}) = 'unknown' THEN NULL
+
+    -- exact number
+    WHEN regexp_like(
+        regexp_replace(lower({{ col }}), '[–—]', '-'),
+        '^[0-9]+$'
+    ) THEN CAST({{ col }} AS DOUBLE)
+
+    -- > X years: 5+
+    WHEN regexp_like(lower({{ col }}),'^[0-9]+\+$'
+    ) THEN
+        CAST(regexp_extract(lower({{ col }}), '^([0-9]+)', 1) AS DOUBLE)
+
+    -- < 1 year: 1-
+    WHEN regexp_like(
+        regexp_replace(lower({{ col }}), '[–—]', '-'),
+        '^[0-9]+-$'
+    ) THEN
+        CAST(
+            regexp_extract(
+                regexp_replace(lower({{ col }}), '[–—]', '-'),
+                '^([0-9]+)',
+                1
+            ) AS DOUBLE
+        ) / 2
+
+    -- range: 5-10 or 5-10+
+    WHEN regexp_like(
+        regexp_replace(lower({{ col }}), '[–—]', '-'),
+        '^[0-9]+-[0-9]+\+?$'
+    ) THEN
+        (
+            CAST(
+                regexp_extract(
+                    regexp_replace(lower({{ col }}), '[–—]', '-'),
+                    '^([0-9]+)',
+                    1
+                ) AS DOUBLE
+            )
+            +
+            CAST(
+                regexp_extract(
+                    regexp_replace(lower({{ col }}), '[–—]', '-'),
+                    '-([0-9]+)',
+                    1
+                ) AS DOUBLE
+            )
+        ) / 2
+
+    ELSE NULL
+END
+
+{% endmacro %}
+
+{% macro yoe_band(yoe_col) %}
+CASE
+    WHEN {{ yoe_col }} IS NULL THEN 'Unknown'
+    WHEN {{ yoe_col }} < 1 THEN '0-1 year'
+    WHEN {{ yoe_col }} < 3 THEN '1-3 years'
+    WHEN {{ yoe_col }} < 5 THEN '3-5 years'
+    WHEN {{ yoe_col }} < 8 THEN '5-8 years'
+    ELSE '8+ years'
+END
+{% endmacro %}
+
+{% macro yoe_level(yoe_col) %}
+CASE
+    WHEN {{ yoe_col }} IS NULL THEN 'Unknown'
+    WHEN {{ yoe_col }} < 1 THEN 'Intern / Fresher'
+    WHEN {{ yoe_col }} < 3 THEN 'Junior'
+    WHEN {{ yoe_col }} < 5 THEN 'Mid-level'
+    WHEN {{ yoe_col }} < 8 THEN 'Senior'
+    ELSE 'Lead / Principal'
+END
+{% endmacro %}

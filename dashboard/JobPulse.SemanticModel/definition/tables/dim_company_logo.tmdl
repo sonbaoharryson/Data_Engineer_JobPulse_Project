@@ -1,0 +1,34 @@
+table dim_company_logo
+	lineageTag: 480dd5b9-c841-45ad-be06-14462d9f9948
+
+	column logo_id
+		dataType: string
+		lineageTag: 028e96a2-5366-4989-8254-fd38a62f10ad
+		summarizeBy: none
+		sourceColumn: logo_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column logo_path
+		dataType: string
+		lineageTag: 3a8a5ff8-d57a-4fd4-8202-414824527618
+		summarizeBy: none
+		sourceColumn: logo_path
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_company_logo = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_silver_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="silver",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_silver_dim_company_logo_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_silver_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="silver",Table="dim_company_logo",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_silver_dim_company_logo_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

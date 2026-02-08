@@ -1,0 +1,144 @@
+table salary_benchmark
+	lineageTag: a9c740d3-b453-45b5-bb57-8e582433f414
+
+	column num_positions
+		dataType: double
+		lineageTag: 668ed5da-697a-4a04-a295-85ce7b93538c
+		summarizeBy: none
+		sourceColumn: num_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_band
+		dataType: string
+		lineageTag: 85664cc0-64aa-4fbf-8f3d-fe58908f8d3c
+		summarizeBy: none
+		sourceColumn: salary_band
+
+		annotation SummarizationSetBy = Automatic
+
+	column salaried_positions
+		dataType: double
+		lineageTag: 4bc31a27-26d0-4e87-958e-259bddaa9eeb
+		summarizeBy: none
+		sourceColumn: salaried_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column avg_salary
+		dataType: double
+		lineageTag: d051ee27-e0fa-4f83-9d9b-e482c1c8b604
+		summarizeBy: none
+		sourceColumn: avg_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_q1
+		dataType: double
+		lineageTag: 60de394b-b156-433e-ae57-73d47539bc01
+		summarizeBy: none
+		sourceColumn: salary_q1
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_median
+		dataType: double
+		lineageTag: 1065594d-a9b0-4343-bf3d-634f69b9b78a
+		summarizeBy: none
+		sourceColumn: salary_median
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_q3
+		dataType: double
+		lineageTag: aed4b218-9436-40b2-b63f-1bc73072ca5d
+		summarizeBy: none
+		sourceColumn: salary_q3
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column min_salary
+		dataType: double
+		lineageTag: 9a827662-615a-41a8-b8ed-b4732c16c864
+		summarizeBy: none
+		sourceColumn: min_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column max_salary
+		dataType: double
+		lineageTag: 5778ea41-9bed-4d50-9907-eebeaaec3861
+		summarizeBy: none
+		sourceColumn: max_salary
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column remote_positions
+		dataType: double
+		lineageTag: 0f5a029b-66f3-4fa2-b013-3cecbf920fdd
+		summarizeBy: none
+		sourceColumn: remote_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column hybrid_positions
+		dataType: double
+		lineageTag: 4d3f047d-c694-4e63-ab22-7c52481ffd9d
+		summarizeBy: none
+		sourceColumn: hybrid_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column on_site_positions
+		dataType: double
+		lineageTag: fd1d7de9-7ad4-4523-bca4-d5090fe19cad
+		summarizeBy: none
+		sourceColumn: on_site_positions
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column salary_band_id
+		dataType: string
+		lineageTag: ef06d7ab-0daf-4312-a774-6d8e3f173341
+		summarizeBy: none
+		sourceColumn: salary_band_id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition salary_benchmark = m
+		mode: import
+		source =
+				let
+				    Source = Trino.Contents("localhost", 8081, null, null, null, null, null, null),
+				    #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null" = Source{[Url="http://localhost:8081/v1/statement",NameKey="iceberg",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",NameKey="gold",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data],
+				    #"http://localhost:8081/v1/statement_iceberg_gold_salary_benchmark_TrinoPBI_5_100_null" = #"http://localhost:8081/v1/statement_iceberg_gold_TrinoPBI_5_100_null"{[Url="http://localhost:8081/v1/statement",Catalog="iceberg",Schema="gold",Table="salary_benchmark",User="TrinoPBI",Retries=5,Timeout=100,TargetResultSize=null]}[Data]
+				in
+				    #"http://localhost:8081/v1/statement_iceberg_gold_salary_benchmark_TrinoPBI_5_100_null"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
