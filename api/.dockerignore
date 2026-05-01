@@ -1,0 +1,4 @@
+.venv_api
+**/__pycache__/
+test/
+README.md

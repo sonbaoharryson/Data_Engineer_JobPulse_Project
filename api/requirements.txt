@@ -1,0 +1,11 @@
+fastapi==0.110.0
+uvicorn[standard]==0.34.0
+pydantic==2.6.3
+pydantic-settings==2.0.0
+python-dotenv==1.0.1
+requests==2.32.3
+qdrant-client==1.9.1
+pymongo==4.6.0
+gunicorn==23.0.0
+minio==7.2.0
+python-multipart==0.0.9

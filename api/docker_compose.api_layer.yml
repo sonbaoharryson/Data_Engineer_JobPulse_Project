@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  api_layer:
+    build: .
+    container_name: api_layer
+    env_file:
+      - ../.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ollama
+      - mongodb
+      - qdrant
