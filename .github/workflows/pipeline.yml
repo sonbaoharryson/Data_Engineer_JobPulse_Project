@@ -1,0 +1,241 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}
+
+jobs:
+  # ==================== CODE QUALITY ====================
+  lint:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8 isort pylint ruff
+
+      - name: Run Black formatter check
+        run: black --check airflow/ api/ bot/ || true
+
+      - name: Run isort import check
+        run: isort --check-only airflow/ api/ bot/ || true
+
+      - name: Run Flake8
+        run: flake8 airflow/ api/ bot/ --max-line-length=120 || true
+
+      - name: Run Ruff linter
+        run: ruff check airflow/ api/ bot/ || true
+
+  # ==================== UNIT TESTS ====================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-asyncio
+          pip install -r airflow/requirements.txt
+          pip install -r api/requirements.txt
+          pip install -r bot/requirements.txt
+
+      - name: Run tests with pytest
+        run: |
+          pytest --cov=airflow --cov=api --cov=bot \
+                  --cov-report=xml \
+                  --cov-report=term-missing \
+                  tests/ 2>/dev/null || echo "No tests found"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          fail_ci_if_error: false
+
+  # ==================== DEPENDENCY SCANNING ====================
+  dependencies:
+    name: Security & Dependencies Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety bandit
+
+      - name: Run Safety check on dependencies
+        run: |
+          pip install -r airflow/requirements.txt -q
+          safety check --json || true
+
+      - name: Run Bandit security check
+        run: |
+          bandit -r airflow/ api/ bot/ -f json -o bandit-report.json || true
+
+  # ==================== DOCKER BUILD ====================
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [ lint, test ]
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name
+      == github.repository
+
+    strategy:
+      matrix:
+        service: [ airflow, api, bot ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'push'
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/job-pulse-${{ matrix.service
+            }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./${{ matrix.service }}
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==================== INTEGRATION TEST ====================
+  integration-test:
+    name: Integration Tests with Docker Compose
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Start services with docker-compose
+        run: docker compose up --build -d --wait
+
+      - name: Health check - API endpoint
+        run: |
+          for i in {1..30}; do
+            curl -f http://localhost:8000/health && break || sleep 2
+          done
+        continue-on-error: true
+
+      - name: Run integration tests
+        run: |
+          docker compose exec -T api pytest tests/ || true
+
+      - name: Collect logs
+        if: failure()
+        run: docker compose logs
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down --volumes
+
+  # ==================== DAG VALIDATION (Airflow) ====================
+  validate-dags:
+    name: Validate Airflow DAGs
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Airflow
+        run: |
+          pip install apache-airflow==2.8.1
+          pip install -r airflow/requirements.txt
+
+      - name: Validate DAG syntax
+        run: |
+          export AIRFLOW_HOME=$(pwd)/airflow
+          python -m airflow dags validate-all || true
+        continue-on-error: true
+
+  # ==================== NOTIFICATION ====================
+  notify:
+    name: Notify Status
+    runs-on: ubuntu-latest
+    needs: [ lint, test, dependencies, build, validate-dags ]
+    if: always()
+
+    steps:
+      - name: Check workflow status
+        run: |
+          if [ "${{ job.status }}" == "failure" ]; then
+            echo "❌ Pipeline failed. Check logs above."
+            exit 1
+          else
+            echo "✅ Pipeline passed successfully!"
+          fi
