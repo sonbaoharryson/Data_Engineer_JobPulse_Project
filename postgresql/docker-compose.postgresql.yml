@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  postgresql_db:
+    image: postgres:16.4 # Pin postgres version for compatibility
+    container_name: postgresql_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_AIRFLOW}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_db/init.sql:/docker-entrypoint-initdb.d/01_create_db.sql
+      - ./init_schema_table/init_schema_tables.sql:/docker-entrypoint-initdb.d/02_create_schema_tables_job_db.sql
+      - ./init_wh_catalog/init_catalog_tables.sql:/docker-entrypoint-initdb.d/03_create_catalog_tables_trino.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_AIRFLOW}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # networks:
+    #   - discord_network

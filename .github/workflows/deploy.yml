@@ -59,6 +59,22 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            API_KEY=${{ secrets.API_KEY }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_USER=${{ secrets.DB_USER }}
+            EMAIL=${{ secrets.EMAIL }}
+            EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+            AIRFLOW_WEBSERVER_SECRET_KEY=${{ secrets.AIRFLOW_WEBSERVER_SECRET_KEY }}
+            MINIO_USER=${{ secrets.MINIO_USER }}
+            MINIO_PASSWORD=${{ secrets.MINIO_PASSWORD }}
+            OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
+            MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
+            MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            ENVIRONMENT=${{ vars.ENVIRONMENT }}
+            LOG_LEVEL=${{ vars.LOG_LEVEL }}
 
   # ==================== SMOKE TEST ====================
   smoke-test:

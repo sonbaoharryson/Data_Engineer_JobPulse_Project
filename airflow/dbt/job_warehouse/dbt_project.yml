@@ -53,3 +53,6 @@ models:
     audit:
       +schema: audit
       +materialized: table
+
+    vector_db:
+      +schema: vector_db

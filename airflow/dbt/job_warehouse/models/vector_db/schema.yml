@@ -1,0 +1,4 @@
+version: 2
+models:
+  - name: job_embeddings
+    description: "Embeddings for job descriptions and titles for vector search"

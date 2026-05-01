@@ -1,0 +1,158 @@
+version: "3.9"
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  pull_policy: never
+  image: job_warehouse_discord:latest
+  restart: always
+  environment: &airflow-common-env
+    AIRFLOW_HOME: /opt/airflow
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor # Upgrade to CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
+    AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_AIRFLOW}
+    AIRFLOW__CELERY__WORKER_CONCURRENCY: 2
+    AIRFLOW__CELERY__WORKER_PREFETCH_MULTIPLIER: 1
+    AIRFLOW__CELERY__TASK_ACKS_LATE: "True"
+    AIRFLOW__CORE__FERNET_KEY: ""
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW_CONN_TRINO_DEFAULT: trino://trino@trino-coordinator:8080/default
+    DBT_TARGET: airflow
+    DB_HOST: ${DB_HOST}
+    DB_PORT: ${DB_PORT}
+    DB_USER: ${DB_USER}
+    DB_PASSWORD: ${DB_PASSWORD}
+    DB_NAME: ${DB_AIRFLOW}
+    QDRANT_HOST: qdrant
+    QDRANT_PORT: 6333
+  env_file:
+    - ../.env
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./config/airflow.cfg:/opt/airflow/config/airflow.cfg
+    - ./scripts:/opt/airflow/scripts
+    - ./tasks:/opt/airflow/tasks
+    - ./dbt:/opt/airflow/dbt
+  depends_on: &airflow-common-depends-on
+    redis:
+      condition: service_healthy
+    postgresql_db:
+      condition: service_healthy
+  # networks:
+  #   - discord_network
+
+services:
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    depends_on:
+      <<: *airflow-common-depends-on
+    environment:
+      <<: *airflow-common-env
+    command: |
+      bash -c '
+      set -e
+
+      echo "Waiting for database..."
+
+      export PGPASSWORD="$DB_PASSWORD"
+
+      until pg_isready \
+        -h "$DB_HOST" \
+        -p "$DB_PORT" \
+        -U "$DB_USER" \
+        -d "$DB_AIRFLOW"; do
+          echo "Postgres not ready yet..."
+          sleep 5
+      done
+
+      echo "Postgres is ready."
+
+      airflow db migrate
+
+      echo "Checking if admin user exists..."
+
+      ADMIN_EXISTS=$(airflow users list | grep -c "$DB_USER" || wc -l)
+
+      if ! airflow users get "$DB_USER" >/dev/null 2>&1; then
+        echo "Creating admin user..."
+        airflow users create \
+          --username "$DB_USER" \
+          --firstname admin \
+          --lastname admin \
+          --role Admin \
+          --email admin@example.com \
+          --password "$DB_PASSWORD"
+      fi
+
+      echo "Airflow init completed."
+      '
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    command: webserver
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-webserver:
+        condition: service_healthy
+    command: scheduler
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker --celery-hostname=%h
+    environment:
+      <<: *airflow-common-env
+      # Required to handle warm shutdown of the celery workers properly
+      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
+      DUMB_INIT_SETSID: "0"
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-webserver:
+        condition: service_healthy
+    healthcheck:
+      # yamllint disable rule:line-length
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      replicas: 2 # Number of worker replicas to run, increase this to create multiple worker containers allowing more parallel task execution
+    mem_swappiness: 0 # Disable swap to prevent slowdowns

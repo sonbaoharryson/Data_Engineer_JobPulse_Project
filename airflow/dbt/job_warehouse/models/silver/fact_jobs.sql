@@ -36,7 +36,8 @@ explode_jobs AS (
 ),
 enriched AS (
     SELECT
-        TO_HEX(MD5(TO_UTF8(CONCAT(source_platform, '|', url)))) AS job_id,
+        TO_HEX(MD5(TO_UTF8(CONCAT(source_platform, '|', url, '|', city_en, '|', job_category)))) AS job_id,
+        ROW_NUMBER() OVER (PARTITION BY TO_HEX(MD5(TO_UTF8(CONCAT(source_platform, '|', url, '|', city_en, '|', job_category)))) ORDER BY job_posted_date DESC) AS rn,
         source_platform,
         url,
         cl.logo_id AS logo_id,
@@ -53,7 +54,7 @@ enriched AS (
         END AS work_model_normalized,
         CASE
             WHEN LOWER(TRIM(work_arrangement)) IN ('toàn thời gian', 'full-time', 'full time', 'full-time', 'fulltime') THEN 'Full-time'
-            WHEN LOWER(TRIM(work_arrangement)) IN ('bán thời gian', 'part-time', 'part time') THEN 'Part-time'
+            WHEN LOWER(TRIM(work_arrangement)) IN ('bán thời gian', 'part-time', 'part time', 'thời vụ') THEN 'Part-time'
             WHEN LOWER(TRIM(work_arrangement)) IN ('thực tập', 'internship', 'intern') THEN 'Internship'
             ELSE TRIM(work_arrangement)
         END AS work_arrangement_normalized,
@@ -84,7 +85,9 @@ enriched AS (
     ON explode_jobs.logo_url = cl.logo_url
 )
 
-SELECT * FROM enriched
+SELECT *
+FROM enriched
+WHERE rn = 1
 
 {% if is_incremental() %}
     WHERE job_posted_date > (SELECT MAX(job_posted_date) FROM {{ this }})
