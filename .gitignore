@@ -1,14 +1,115 @@
+# Environment files
 .env
-.venv
-.venv_api
-.project_venv
-.git
-discord_bot_job_automate.egg-info
+.env.local
+.env.*.local
+.example.env
+
+# Virtual environments
+.venv/
+.venv_api/
+.project_venv/
+bot/bot_venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python build and cache
+__pycache__/
 **/__pycache__/
-db/
-target/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing and coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Airflow and dbt artifacts
+airflow/logs/
+airflow/dags/__pycache__/
+airflow/dbt/job_warehouse/target/
+airflow/dbt/job_warehouse/logs/
+airflow/dbt/job_warehouse/models/gold/
+airflow/dbt/job_warehouse/.user.yml
 dbt_packages/
 logs/
-.user.yml
-profiles.yml
-dbt/job_warehouse/models/gold/
+target/
+
+# Logs
+*.log
+logs/
+
+# Secrets and keys
+*.key
+*.pem
+*.crt
+*.cer
+secrets/
+keys/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

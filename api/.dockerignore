@@ -1,4 +1,73 @@
+# API service Docker ignore rules
+
+# Python environments
+.venv
 .venv_api
-**/__pycache__/
-test/
-README.md
+.project_venv
+venv
+env
+ENV
+
+# Python cache and bytecode
+__pycache__
+**/__pycache__
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.dmypy.json
+
+# Environment files
+.env
+.env.*
+.example.env
+
+# Logs and test artifacts
+*.log
+logs
+coverage.xml
+htmlcov
+.tox
+.nox
+
+# Build artifacts
+build
+dist
+*.egg-info
+.eggs
+
+# Database and data files
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker and compose files
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
+
+# IDE/editor files
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Secrets and keys
+*.key
+*.pem
+*.crt
+*.cer
+secrets
+keys
+
+# Service tests
+test
+
+# dbt files
+dbt
