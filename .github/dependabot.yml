@@ -1,170 +1,27 @@
 version: 2
+
 updates:
-  # Python dependencies in airflow
   - package-ecosystem: "pip"
     directory: "/airflow"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    open-pull-requests-limit: 2 # Reduced from 5
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "airflow"
-    groups:
-      airflow-dependencies:
-        patterns:
-          - "*"
 
-  # Python dependencies in API
   - package-ecosystem: "pip"
     directory: "/api"
     schedule:
       interval: "weekly"
-      day: "tuesday" # Staggered day
-      time: "03:00"
-    open-pull-requests-limit: 2
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "api"
-    groups:
-      api-dependencies:
-        patterns:
-          - "*"
 
-  # Python dependencies in Bot
   - package-ecosystem: "pip"
     directory: "/bot"
     schedule:
       interval: "weekly"
-      day: "wednesday" # Staggered day
-      time: "03:00"
-    open-pull-requests-limit: 2
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "bot"
-    groups:
-      bot-dependencies:
-        patterns:
-          - "*"
 
-  # Docker image updates (grouped)
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "thursday"
-      time: "03:00"
-    open-pull-requests-limit: 1
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "docker"
-    groups:
-      docker-images:
-        patterns:
-          - "*"
 
-  # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "friday"
-      time: "03:00"
-    open-pull-requests-limit: 1
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "ci/cd"
-  # Python dependencies in airflow
-  - package-ecosystem: "pip"
-    directory: "/airflow"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "airflow"
-
-  # Python dependencies in API
-  - package-ecosystem: "pip"
-    directory: "/api"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "api"
-
-  # Python dependencies in Bot
-  - package-ecosystem: "pip"
-    directory: "/bot"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "your-github-username"
-    labels:
-      - "dependencies"
-      - "bot"
-
-  # Docker image updates
-  - package-ecosystem: "docker"
-    directory: "/airflow"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    labels:
-      - "dependencies"
-      - "docker"
-
-  - package-ecosystem: "docker"
-    directory: "/api"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    labels:
-      - "dependencies"
-      - "docker"
-
-  - package-ecosystem: "docker"
-    directory: "/bot"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    labels:
-      - "dependencies"
-      - "docker"
-
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "03:00"
-    labels:
-      - "dependencies"
-      - "ci/cd"

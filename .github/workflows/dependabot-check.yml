@@ -1,0 +1,30 @@
+name: Dependabot Checks
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - run: |
+          pip install safety bandit
+          pip install -r airflow/requirements.txt
+
+      - name: Security check
+        run: safety check
+
+      - name: Syntax check
+        run: |
+          python -m py_compile airflow/dags/*.py
+          python -c "import api.app"
+          python -c "import bot.bot"

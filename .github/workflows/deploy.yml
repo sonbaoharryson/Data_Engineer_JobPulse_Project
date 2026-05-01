@@ -4,128 +4,53 @@ on:
   push:
     branches: [ main ]
     tags: [ "v*" ]
-  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository_owner }}
 
 jobs:
-  # ==================== BUILD & PUSH ====================
-  build-and-push:
-    name: Build & Push Docker Images
+  deploy:
     runs-on: ubuntu-latest
-
-    outputs:
-      airflow-image: ${{ steps.meta-airflow.outputs.tags }}
-      api-image: ${{ steps.meta-api.outputs.tags }}
-      bot-image: ${{ steps.meta-bot.outputs.tags }}
 
     strategy:
       matrix:
         service: [ airflow, api, bot ]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v2
+      - uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (${{ matrix.service }})
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/job-pulse-${{ matrix.service
-            }}
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=sha,prefix={{branch}}-
-
-      - name: Build and push ${{ matrix.service }}
+      - name: Build & Push
         uses: docker/build-push-action@v4
         with:
           context: ./${{ matrix.service }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
-            API_KEY=${{ secrets.API_KEY }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_USER=${{ secrets.DB_USER }}
-            EMAIL=${{ secrets.EMAIL }}
-            EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
-            AIRFLOW_WEBSERVER_SECRET_KEY=${{ secrets.AIRFLOW_WEBSERVER_SECRET_KEY }}
-            MINIO_USER=${{ secrets.MINIO_USER }}
-            MINIO_PASSWORD=${{ secrets.MINIO_PASSWORD }}
-            OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
-            MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }}
-            MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
-            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-            ENVIRONMENT=${{ vars.ENVIRONMENT }}
-            LOG_LEVEL=${{ vars.LOG_LEVEL }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/job-pulse-${{ matrix.service
+            }}:latest
 
-  # ==================== SMOKE TEST ====================
   smoke-test:
-    name: Smoke Tests on Production Build
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: deploy
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Start services
-        run: |
-          docker compose --file docker-compose.yml up -d --wait
+      - run: docker compose up -d --wait
 
-      - name: Health check API
-        run: |
+      - run: |
           for i in {1..30}; do
             curl -f http://localhost:8000/health && break || sleep 2
           done
 
-      - name: Test critical endpoints
-        run: |
-          curl -f http://localhost:8000/api/jobs || exit 1
+      - run: curl -f http://localhost:8000/api/jobs
 
-      - name: Cleanup
-        if: always()
+      - if: always()
         run: docker compose down
-
-  # ==================== CREATE RELEASE ====================
-  create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: smoke-test
-    if: startsWith(github.ref, 'refs/tags/')
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Create Release Notes
-        id: release
-        run: |
-          TAG=${{ github.ref_name }}
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "Creating release for ${TAG}"
-
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.release.outputs.tag }}
-          name: Release ${{ steps.release.outputs.tag }}
-          draft: false
-          prerelease: false
