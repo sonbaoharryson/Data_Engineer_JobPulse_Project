@@ -51,7 +51,7 @@ jobs:
             type=sha,prefix={{branch}}-
 
       - name: Build and push ${{ matrix.service }}
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v7
         with:
           context: ./${{ matrix.service }}
           push: true
