@@ -17,21 +17,19 @@ def job_to_embed(job: Dict) -> Any:
         ) from exc
 
     embed = discord.Embed(
-        title=job.get('title', '').strip(),
-        url=job.get('url', '').strip(),
-        color=discord.Color.blue()
+        title=job.get("title", "").strip(),
+        url=job.get("url", "").strip(),
+        color=discord.Color.blue(),
     )
 
-    if job.get('logo'):
-        embed.set_thumbnail(url=job['logo'].strip())
+    if job.get("logo"):
+        embed.set_thumbnail(url=job["logo"].strip())
 
-    if job.get('location'):
-        embed.add_field(name='📍 Location', value=job['location'].strip(), inline=True)
+    if job.get("location"):
+        embed.add_field(name="📍 Location", value=job["location"].strip(), inline=True)
 
     embed.add_field(
-        name="💰 Salary",
-        value=job.get("salary") or "Negotiable",
-        inline=True
+        name="💰 Salary", value=job.get("salary") or "Negotiable", inline=True
     )
 
     embed.set_footer(text="New Job Alert 🚀")

@@ -1,4 +1,5 @@
 import argparse
+
 # from dataclasses import dataclass
 from llm_model import LLMModel
 from langchain_chroma import Chroma
@@ -29,9 +30,7 @@ def main():
     embedding_function = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
-    db = Chroma(persist_directory=CHROMA_PATH,
-                embedding_function=embedding_function
-            )
+    db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 
     # Search the DB.
     results = db.similarity_search_with_score(query_text, k=5)
@@ -51,6 +50,7 @@ def main():
     # sources = [doc.metadata.get("source", None) for doc, _score in results]
     # formatted_response = f"Response: {response_text}\nSources: {sources}"
     # print(formatted_response)
+
 
 if __name__ == "__main__":
     main()

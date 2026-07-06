@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 load_dotenv()
 
+
 class DBConnection:
     def __init__(self):
         self.engine = self._create_db_connection()
@@ -25,8 +26,8 @@ class DBConnection:
         if not jobs:
             print("No IT Viec jobs to insert")
 
-        #UpSert jobs into the database
-        #Using ON CONFLICT to handle duplicates based on the URL
+        # UpSert jobs into the database
+        # Using ON CONFLICT to handle duplicates based on the URL
         query = text("""
             INSERT INTO staging.itviec_data_job (title, company, logo_url, url, job_category, working_location, work_model, tags, descriptions, requirements_and_experiences)
                     VALUES (:title, :company, :logo, :url, :job_cat, :location, :mode, :tags, :descriptions, :requirements)
@@ -57,7 +58,7 @@ class DBConnection:
     def insert_topcv_jobs(self, jobs):
         """Insert TopCV jobs into database"""
 
-        engine = self.engine    
+        engine = self.engine
         if not jobs:
             print("No TopCV jobs to insert")
 
@@ -89,11 +90,11 @@ class DBConnection:
                     print(f"Error inserting TopCV jobs: {e}")
         except SQLAlchemyError as e:
             print(f"Database error: {e}")
-    
+
     def insert_company_logos(self, logos):
         """Insert company logos into database"""
 
-        engine = self.engine    
+        engine = self.engine
         if not logos:
             print("No company logos to insert")
 
@@ -115,15 +116,15 @@ class DBConnection:
         except SQLAlchemyError as e:
             print(f"Database error: {e}")
         return None
-    
+
     def update_company_logos(self, logos: list[dict]):
         """Update company logo path (MinIO path) in database"""
-        
+
         if not logos:
             print("No company logos to update")
             return
-    
-        engine  = self.engine
+
+        engine = self.engine
         query = text("""
             UPDATE staging.company_logos
             SET logo_path = :logo_path,

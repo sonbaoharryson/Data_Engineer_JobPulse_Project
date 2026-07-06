@@ -2,14 +2,18 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: ${{ github.repository_owner }}
+
+permissions:
+  contents: read
+  packages: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -53,16 +57,16 @@ jobs:
           pip install -r bot/requirements.txt
 
       - run: |
-          pytest tests/ --maxfail=1 --disable-warnings
+          pytest airflow/scripts/test/ --maxfail=1 --disable-warnings
 
   # ==================== DOCKER BUILD ====================
   build:
     runs-on: ubuntu-latest
-    needs: [ lint, test ]
+    needs: [lint, test]
 
     strategy:
       matrix:
-        service: [ airflow, api, bot ]
+        service: [airflow, api, bot]
 
     steps:
       - uses: actions/checkout@v4
@@ -80,8 +84,7 @@ jobs:
         with:
           context: ./${{ matrix.service }}
           push: ${{ github.event_name == 'push' }}
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/job-pulse-${{ matrix.service
-            }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/job-pulse-${{ matrix.service }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

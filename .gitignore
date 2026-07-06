@@ -3,6 +3,7 @@
 .env.local
 .env.*.local
 .example.env
+.git
 
 # Virtual environments
 .venv/

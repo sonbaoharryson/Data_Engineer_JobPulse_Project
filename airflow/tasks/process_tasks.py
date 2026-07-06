@@ -183,8 +183,7 @@ def insert_company_logos_to_staging_layer():
     try:
         conn = DBConnection()
         # add LEFT JOIN to filter out existing logos
-        query = text(
-            """
+        query = text("""
             SELECT logos.logo_url
             FROM (
                 SELECT DISTINCT logo_url
@@ -198,8 +197,7 @@ def insert_company_logos_to_staging_layer():
             LEFT JOIN staging.company_logos AS cl
             ON logos.logo_url = cl.logo_url
             WHERE cl.logo_url IS NULL
-            """
-        )
+            """)
         with conn.engine.connect() as connection:
             data = [dict(row) for row in connection.execute(query).fetchall()]
 
@@ -302,10 +300,10 @@ def post_job_to_discord(crawl_source: str):
         posts_send, posts_failed_sent = send_job_alerts(
             jobs, DISCORD_TOKEN, DISCORD_CHANNEL_ID
         )
-        mark_jobs_as_posted(
-            table_name="itviec_data_job", job_urls=urls
-        ) if crawl_source == "itviec" else mark_jobs_as_posted(
-            table_name="topcv_data_job", job_urls=urls
+        (
+            mark_jobs_as_posted(table_name="itviec_data_job", job_urls=urls)
+            if crawl_source == "itviec"
+            else mark_jobs_as_posted(table_name="topcv_data_job", job_urls=urls)
         )
         return_dict = {"posts_sent": posts_send, "posts_failed": posts_failed_sent}
         return return_dict

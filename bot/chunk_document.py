@@ -16,8 +16,10 @@ load_dotenv()
 CHROMA_PATH = "chroma"
 DATA_PATH = "data"
 
+
 def main():
     generate_data_store()
+
 
 def generate_data_store():
     documents = load_documents()
@@ -25,10 +27,12 @@ def generate_data_store():
     chunks = split_text(documents)
     save_to_chroma(chunks)
 
+
 def load_documents():
     loader = DirectoryLoader(DATA_PATH, glob="*.pdf")
     documents = loader.load()
     return documents
+
 
 def split_text(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
@@ -40,6 +44,7 @@ def split_text(documents: list[Document]):
     chunks = text_splitter.split_documents(documents)
     return chunks
 
+
 def save_to_chroma(chunks: list[Document]):
     if os.path.exists(CHROMA_PATH):
         shutil.rmtree(CHROMA_PATH)
@@ -48,10 +53,9 @@ def save_to_chroma(chunks: list[Document]):
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-    db = Chroma.from_documents(
-        chunks, embeddings, persist_directory=CHROMA_PATH
-    )
-    #db.persist()
+    db = Chroma.from_documents(chunks, embeddings, persist_directory=CHROMA_PATH)
+    # db.persist()
+
 
 if __name__ == "__main__":
     main()

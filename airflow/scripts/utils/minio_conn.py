@@ -6,7 +6,10 @@ import hashlib
 import imghdr
 import base64
 from dotenv import load_dotenv
+
 load_dotenv()
+
+
 class MinIOConnection:
 
     def __init__(self):
@@ -14,15 +17,18 @@ class MinIOConnection:
 
     def _connect_minio(self):
         return Minio(
-            "object-store:9000", # change to localhost for local testing
+            "object-store:9000",  # change to localhost for local testing
             access_key=os.getenv("MINIO_USER"),
             secret_key=os.getenv("MINIO_PASSWORD"),
-            secure=False
+            secure=False,
         )
-    
-    def upload_data_object(self, bucket_name: str, data_object: list[dict], destination_file: str):
+
+    def upload_data_object(
+        self, bucket_name: str, data_object: list[dict], destination_file: str
+    ):
         import json
         import io
+
         """Upload a file to a specified bucket in MinIO"""
         try:
             self.minio_client.bucket_exists(bucket_name)
@@ -39,8 +45,8 @@ class MinIOConnection:
                 bucket_name,
                 destination_file,
                 json_bytes,
-                length=len(json_bytes_raw),   # ✅ BYTES length
-                content_type="application/json"
+                length=len(json_bytes_raw),  # ✅ BYTES length
+                content_type="application/json",
             )
         except S3Error as e:
             print(f"Error uploading file: {e}")
@@ -50,8 +56,8 @@ class MinIOConnection:
         response = None
         try:
             response = self.minio_client.get_object(bucket_name, object_name)
-            
-            data = response.read().decode('utf-8')
+
+            data = response.read().decode("utf-8")
             return data
         except S3Error as e:
             print(f"Error reading file: {e}")
@@ -59,7 +65,7 @@ class MinIOConnection:
             if response:
                 response.close()
                 response.release_conn()
-    
+
     def upload_file(self, bucket_name: str, source_url: str, content: bytes):
         def _detect_extension(content: bytes) -> str:
             img_type = imghdr.what(None, content)

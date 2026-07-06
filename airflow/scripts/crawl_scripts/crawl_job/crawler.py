@@ -1,6 +1,7 @@
 from .topcv import TopCVScraper
 from .it_viec import ITViecScraper
 
+
 class Crawler:
     def __init__(self, source):
         self.source = source

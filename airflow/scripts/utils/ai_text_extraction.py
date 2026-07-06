@@ -57,6 +57,7 @@ Output:
 Now extract:
 """
 
+
 class AITextExtraction:
     def __init__(self):
         self.OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -68,7 +69,7 @@ class AITextExtraction:
     def call_openrouter(self, prompt: str) -> Dict[str, Any]:
         headers = {
             "Authorization": f"Bearer {self.API_KEY}",
-            "Content-Type": "application/json; charset=utf-8"
+            "Content-Type": "application/json; charset=utf-8",
         }
 
         payload = {
@@ -76,15 +77,12 @@ class AITextExtraction:
             "temperature": 0.0,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt}
-            ]
+                {"role": "user", "content": prompt},
+            ],
         }
 
         response = requests.post(
-            self.OPENROUTER_API_URL,
-            headers=headers,
-            json=payload,
-            timeout=120
+            self.OPENROUTER_API_URL, headers=headers, json=payload, timeout=120
         )
         response.raise_for_status()
         result = response.json()
