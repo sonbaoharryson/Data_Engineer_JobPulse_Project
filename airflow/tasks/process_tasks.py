@@ -270,11 +270,8 @@ def update_company_logos_in_staging_layer(results: list[dict]):
 def post_job_to_discord(crawl_source: str):
     import os
 
-    from scripts.utils.sender import (
-        mark_jobs_as_posted,
-        query_unposted_jobs,
-        send_job_alerts,
-    )
+    from scripts.utils.sender import (mark_jobs_as_posted, query_unposted_jobs,
+                                      send_job_alerts)
 
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID", "0"))

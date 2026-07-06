@@ -5,14 +5,9 @@ sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from datetime import datetime, timedelta
 
 from airflow.decorators import dag
-from tasks.tasks_group import (
-    dbt_wh_pipeline,
-    embedding_data_vector_db_group,
-    itviec_pipeline,
-    post_job_group,
-    process_company_logos_group,
-    topcv_pipeline,
-)
+from tasks.tasks_group import (dbt_wh_pipeline, embedding_data_vector_db_group,
+                               itviec_pipeline, post_job_group,
+                               process_company_logos_group, topcv_pipeline)
 
 default_args = {
     "owner": "sonbao",
