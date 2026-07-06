@@ -33,10 +33,10 @@ jobs:
 
       - run: |
           pip install black flake8 isort ruff
-          black --check airflow/ api/ bot/
-          isort --check-only airflow/ api/ bot/
-          flake8 airflow/ api/ bot/ --max-line-length=120
-          ruff check airflow/ api/ bot/
+          black --check airflow/ api/ bot/ --exclude 'bot/bot_venv|api/\.venv_api|airflow/\.venv'
+          isort --check-only airflow/ api/ bot/ --skip bot/bot_venv --skip api/.venv_api --skip airflow/.venv
+          flake8 airflow/ api/ bot/ --max-line-length=120 --exclude bot/bot_venv,api/.venv_api,airflow/.venv
+          ruff check airflow/ api/ bot/ --exclude bot/bot_venv,api/.venv_api,airflow/.venv
 
   # ==================== TEST ====================
   test:
