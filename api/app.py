@@ -1,7 +1,8 @@
+import os
+
+from config import Settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config import Settings
-import os
 
 # Initialize FastAPI app
 app = FastAPI(

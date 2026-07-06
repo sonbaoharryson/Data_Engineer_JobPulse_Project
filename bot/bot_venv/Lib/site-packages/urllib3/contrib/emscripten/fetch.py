@@ -43,12 +43,8 @@ from importlib.resources import files
 from typing import TYPE_CHECKING, Any
 
 import js  # type: ignore[import-not-found]
-from pyodide.ffi import (  # type: ignore[import-not-found]
-    JsArray,
-    JsException,
-    JsProxy,
-    to_js,
-)
+from pyodide.ffi import (JsArray,  # type: ignore[import-not-found]
+                         JsException, JsProxy, to_js)
 
 if TYPE_CHECKING:
     from typing_extensions import Buffer

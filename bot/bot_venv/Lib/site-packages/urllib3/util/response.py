@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import http.client as httplib
-from email.errors import MultipartInvariantViolationDefect, StartBoundaryNotFoundDefect
+from email.errors import (MultipartInvariantViolationDefect,
+                          StartBoundaryNotFoundDefect)
 
 from ..exceptions import HeaderParsingError
 

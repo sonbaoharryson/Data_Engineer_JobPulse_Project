@@ -1,11 +1,13 @@
-from minio import Minio
-from minio.error import S3Error
-from io import BytesIO
-import os
+import base64
 import hashlib
 import imghdr
-import base64
+import os
+from io import BytesIO
+
 from dotenv import load_dotenv
+from minio.error import S3Error
+
+from minio import Minio
 
 load_dotenv()
 
@@ -26,8 +28,8 @@ class MinIOConnection:
     def upload_data_object(
         self, bucket_name: str, data_object: list[dict], destination_file: str
     ):
-        import json
         import io
+        import json
 
         """Upload a file to a specified bucket in MinIO"""
         try:

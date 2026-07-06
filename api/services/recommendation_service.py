@@ -1,5 +1,6 @@
 import logging
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from clients.ollama_client import OllamaClient
 from clients.qdrant_client import QdrantClientWrapper
 from config import Settings

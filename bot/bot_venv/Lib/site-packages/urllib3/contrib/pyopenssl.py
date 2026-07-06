@@ -44,7 +44,8 @@ import OpenSSL.SSL  # type: ignore[import-not-found]
 from cryptography import x509
 
 try:
-    from cryptography.x509 import UnsupportedExtension  # type: ignore[attr-defined]
+    from cryptography.x509 import \
+        UnsupportedExtension  # type: ignore[attr-defined]
 except ImportError:
     # UnsupportedExtension is gone in cryptography >= 2.1.0
     class UnsupportedExtension(Exception):  # type: ignore[no-redef]

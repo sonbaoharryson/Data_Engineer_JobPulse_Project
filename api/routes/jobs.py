@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List
-from services import recommendation_service
-from schemas import RecommendJobsRequest, RecommendJobsResponse
-from config import Settings
 import logging
+from typing import List
+
+from config import Settings
+from fastapi import APIRouter, Depends, HTTPException
+from schemas import RecommendJobsRequest, RecommendJobsResponse
+from services import recommendation_service
 
 logger = logging.getLogger(__name__)
 

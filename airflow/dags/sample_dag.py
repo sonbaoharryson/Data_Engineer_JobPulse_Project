@@ -1,5 +1,6 @@
-from airflow.decorators import dag, task
 from datetime import datetime, timedelta
+
+from airflow.decorators import dag, task
 
 
 @dag(

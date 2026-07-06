@@ -9,15 +9,9 @@ import typing
 from itertools import takewhile
 from types import TracebackType
 
-from ..exceptions import (
-    ConnectTimeoutError,
-    InvalidHeader,
-    MaxRetryError,
-    ProtocolError,
-    ProxyError,
-    ReadTimeoutError,
-    ResponseError,
-)
+from ..exceptions import (ConnectTimeoutError, InvalidHeader, MaxRetryError,
+                          ProtocolError, ProxyError, ReadTimeoutError,
+                          ResponseError)
 from .util import reraise
 
 if typing.TYPE_CHECKING:

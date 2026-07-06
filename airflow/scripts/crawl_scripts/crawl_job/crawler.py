@@ -1,5 +1,5 @@
-from .topcv import TopCVScraper
 from .it_viec import ITViecScraper
+from .topcv import TopCVScraper
 
 
 class Crawler:

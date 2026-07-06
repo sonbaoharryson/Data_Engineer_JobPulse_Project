@@ -1,8 +1,9 @@
-import requests
+import base64
 import hashlib
 import imghdr
-import base64
 from io import BytesIO
+
+import requests
 from PIL import Image
 from rembg import remove
 

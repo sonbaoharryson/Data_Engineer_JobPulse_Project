@@ -1,10 +1,11 @@
+import logging
 import os
+import sys
+
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from functions.reponse import generate_response
-import logging
-import sys
 
 # Configure logging to output to stdout
 logging.basicConfig(

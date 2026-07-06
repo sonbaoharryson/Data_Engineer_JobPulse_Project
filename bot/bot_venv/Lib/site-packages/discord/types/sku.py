@@ -24,7 +24,8 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TypedDict, Optional, Literal
+from typing import Literal, Optional, TypedDict
+
 from typing_extensions import NotRequired
 
 

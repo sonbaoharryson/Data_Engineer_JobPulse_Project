@@ -1,11 +1,12 @@
 import logging
-from typing import List, Dict, Optional, Any
-from clients.ollama_client import OllamaClient
+from typing import Any, Dict, List, Optional
+
 from clients.mongodb_client import MongoDBClientWrapper
+from clients.ollama_client import OllamaClient
+from config import Settings
 from services.memory_service import MemoryService
 from services.recommendation_service import RecommendationService
 from services.resume_service import ResumeService
-from config import Settings
 
 logger = logging.getLogger(__name__)
 

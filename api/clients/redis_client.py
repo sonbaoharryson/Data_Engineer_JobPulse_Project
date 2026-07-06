@@ -1,8 +1,10 @@
 import json
 import logging
-from typing import List, Dict, Any, Optional
-import redis
+from typing import Any, Dict, List, Optional
+
 from config import Settings
+
+import redis
 
 logger = logging.getLogger(__name__)
 

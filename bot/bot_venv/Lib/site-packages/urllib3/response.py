@@ -29,19 +29,10 @@ from . import util
 from ._base_connection import _TYPE_BODY
 from ._collections import HTTPHeaderDict
 from .connection import BaseSSLError, HTTPConnection, HTTPException
-from .exceptions import (
-    BodyNotHttplibCompatible,
-    DecodeError,
-    DependencyWarning,
-    HTTPError,
-    IncompleteRead,
-    InvalidChunkLength,
-    InvalidHeader,
-    ProtocolError,
-    ReadTimeoutError,
-    ResponseNotChunked,
-    SSLError,
-)
+from .exceptions import (BodyNotHttplibCompatible, DecodeError,
+                         DependencyWarning, HTTPError, IncompleteRead,
+                         InvalidChunkLength, InvalidHeader, ProtocolError,
+                         ReadTimeoutError, ResponseNotChunked, SSLError)
 from .util.response import is_fp_closed, is_response_to_head
 from .util.retry import Retry
 

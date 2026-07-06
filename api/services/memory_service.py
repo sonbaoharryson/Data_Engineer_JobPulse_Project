@@ -1,5 +1,6 @@
 import logging
-from typing import List, Dict
+from typing import Dict, List
+
 from clients.mongodb_client import MongoDBClientWrapper
 from config import Settings
 

@@ -1,8 +1,9 @@
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
+from config import Settings
 from qdrant_client import QdrantClient
 from qdrant_client.models import ScoredPoint
-from config import Settings
 
 logger = logging.getLogger(__name__)
 

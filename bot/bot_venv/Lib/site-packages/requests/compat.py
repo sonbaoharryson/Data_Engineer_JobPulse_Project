@@ -74,29 +74,14 @@ from collections.abc import Callable, Mapping, MutableMapping
 from http import cookiejar as cookielib
 from http.cookies import Morsel
 from io import StringIO
-
 # --------------
 # Legacy Imports
 # --------------
-from urllib.parse import (
-    quote,
-    quote_plus,
-    unquote,
-    unquote_plus,
-    urldefrag,
-    urlencode,
-    urljoin,
-    urlparse,
-    urlsplit,
-    urlunparse,
-)
-from urllib.request import (
-    getproxies,
-    getproxies_environment,
-    parse_http_list,
-    proxy_bypass,
-    proxy_bypass_environment,
-)
+from urllib.parse import (quote, quote_plus, unquote, unquote_plus, urldefrag,
+                          urlencode, urljoin, urlparse, urlsplit, urlunparse)
+from urllib.request import (getproxies, getproxies_environment,
+                            parse_http_list, proxy_bypass,
+                            proxy_bypass_environment)
 
 builtin_str = str
 str = str

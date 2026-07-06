@@ -1,9 +1,11 @@
 import asyncio
 import logging
-from .formatter import job_to_embed
-from .db_conn import DBConnection
+from typing import Any, List
+
 from sqlalchemy import text
-from typing import List, Any
+
+from .db_conn import DBConnection
+from .formatter import job_to_embed
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:

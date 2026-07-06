@@ -1,13 +1,14 @@
 # from langchain.document_loaders import DirectoryLoader
-from langchain_community.document_loaders import DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
-from langchain_openai import OpenAIEmbeddings
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from dotenv import load_dotenv
 import os
 import shutil
+
+from dotenv import load_dotenv
+from langchain.schema import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+from langchain_community.document_loaders import DirectoryLoader
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 # Load environment variables
 load_dotenv()

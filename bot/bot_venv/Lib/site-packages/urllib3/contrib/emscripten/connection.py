@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import typing
-
 # use http.client.HTTPException for consistency with non-emscripten
 from http.client import HTTPException as HTTPException  # noqa: F401
 from http.client import ResponseNotReady
@@ -14,7 +13,8 @@ from ...response import BaseHTTPResponse
 from ...util.connection import _TYPE_SOCKET_OPTIONS
 from ...util.timeout import _DEFAULT_TIMEOUT, _TYPE_TIMEOUT
 from ...util.url import Url
-from .fetch import _RequestError, _TimeoutError, send_request, send_streaming_request
+from .fetch import (_RequestError, _TimeoutError, send_request,
+                    send_streaming_request)
 from .request import EmscriptenRequest
 from .response import EmscriptenHttpResponseWrapper, EmscriptenResponse
 

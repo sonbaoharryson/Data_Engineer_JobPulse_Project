@@ -1,7 +1,8 @@
-import requests
-import os
 import logging
+import os
 import sys
+
+import requests
 
 # Configure logging explicitly
 logging.basicConfig(

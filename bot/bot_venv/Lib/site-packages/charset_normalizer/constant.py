@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from codecs import BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE, BOM_UTF32_BE, BOM_UTF32_LE
+from codecs import (BOM_UTF8, BOM_UTF16_BE, BOM_UTF16_LE, BOM_UTF32_BE,
+                    BOM_UTF32_LE)
 from encodings.aliases import aliases
 from re import IGNORECASE
 from re import compile as re_compile

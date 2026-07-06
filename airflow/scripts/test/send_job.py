@@ -2,8 +2,8 @@ import os
 import sys
 
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.sender import send_job_alerts
 from dotenv import load_dotenv
+from utils.sender import send_job_alerts
 
 load_dotenv()
 

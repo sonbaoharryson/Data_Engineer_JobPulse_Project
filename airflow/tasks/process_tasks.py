@@ -1,11 +1,11 @@
+import base64
+import json
+import logging
 import os
 import sys
-import logging
-import json
-import base64
 
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from typing import List, Dict
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -268,12 +268,10 @@ def update_company_logos_in_staging_layer(results: list[dict]):
 
 
 def post_job_to_discord(crawl_source: str):
-    from scripts.utils.sender import (
-        query_unposted_jobs,
-        mark_jobs_as_posted,
-        send_job_alerts,
-    )
     import os
+
+    from scripts.utils.sender import (mark_jobs_as_posted, query_unposted_jobs,
+                                      send_job_alerts)
 
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     DISCORD_CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID", "0"))
@@ -313,8 +311,9 @@ def post_job_to_discord(crawl_source: str):
 
 
 def getting_data_for_embedding_task():
-    from airflow.providers.trino.hooks.trino import TrinoHook
     import os
+
+    from airflow.providers.trino.hooks.trino import TrinoHook
 
     trino_conn_id = os.getenv("TRINO_CONN_ID", "TRINO_DEFAULT")
     try:

@@ -1,10 +1,11 @@
-import os
 import logging
+import os
 import sys
 
 sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from airflow.decorators import dag
 from datetime import datetime, timedelta
+
+from airflow.decorators import dag
 from tasks.tasks_group import embedding_data_vector_db_group
 
 logger = logging.getLogger(__name__)

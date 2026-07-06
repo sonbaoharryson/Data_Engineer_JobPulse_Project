@@ -1,8 +1,10 @@
 import logging
 from typing import Optional
-from minio import Minio
-from minio.error import S3Error
+
 from config import Settings
+from minio.error import S3Error
+
+from minio import Minio
 
 logger = logging.getLogger(__name__)
 

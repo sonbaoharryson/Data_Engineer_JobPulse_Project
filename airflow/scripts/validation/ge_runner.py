@@ -1,7 +1,8 @@
+import logging
+from datetime import datetime
+
 import great_expectations as gx
 import pandas as pd
-from datetime import datetime
-import logging
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

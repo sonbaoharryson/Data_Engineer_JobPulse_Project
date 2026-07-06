@@ -1,15 +1,17 @@
-import time
-import random
 import logging
-from typing import List, Dict, Optional
+import random
+import time
+from typing import Dict, List, Optional
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from .helpers.extracting_info import _safe_text, _safe_attr, _safe_find
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
+from webdriver_manager.chrome import ChromeDriverManager
+
+from .helpers.extracting_info import _safe_attr, _safe_find, _safe_text
 
 # ---------------- LOGGING ---------------- #
 logging.basicConfig(

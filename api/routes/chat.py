@@ -1,27 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+import logging
+
+from clients.minio_client import MinioClientWrapper
+from clients.mongodb_client import MongoDBClientWrapper
+from config import Settings
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
+from schemas import (ChatHistory, ChatRequest, ChatResponse,
+                     RecommendJobsRequest, RecommendJobsResponse,
+                     ResumeReviewRequest, ResumeReviewResponse,
+                     UploadResumeRequest, UploadResumeResponse, UserProfile,
+                     UserProfileResponse, UserProfileUpdate)
 from services.chat_service import ChatService
+from services.memory_service import MemoryService
 from services.recommendation_service import RecommendationService
 from services.resume_service import ResumeService
-from services.memory_service import MemoryService
-from clients.mongodb_client import MongoDBClientWrapper
-from clients.minio_client import MinioClientWrapper
-from schemas import (
-    ChatRequest,
-    ChatResponse,
-    RecommendJobsRequest,
-    RecommendJobsResponse,
-    ResumeReviewRequest,
-    ResumeReviewResponse,
-    ChatHistory,
-    UserProfile,
-    UserProfileUpdate,
-    UserProfileResponse,
-    UploadResumeRequest,
-    UploadResumeResponse,
-)
-from config import Settings
-import logging
 
 logger = logging.getLogger(__name__)
 

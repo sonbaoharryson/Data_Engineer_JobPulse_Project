@@ -1,2 +1,1 @@
-from . import chat
-from . import jobs
+from . import chat, jobs

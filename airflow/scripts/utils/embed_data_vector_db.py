@@ -1,10 +1,11 @@
-import os
-import requests
 import logging
+import os
 import uuid
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import requests
 from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct
+from qdrant_client.models import Distance, PointStruct, VectorParams
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:

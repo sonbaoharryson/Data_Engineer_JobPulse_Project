@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
+from config import Settings
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
-from config import Settings
 
 logger = logging.getLogger(__name__)
 

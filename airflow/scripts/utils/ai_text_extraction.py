@@ -1,8 +1,9 @@
-import os
 import json
-import requests
+import os
+from typing import Any, Dict
+
 import pandas as pd
-from typing import Dict, Any
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()

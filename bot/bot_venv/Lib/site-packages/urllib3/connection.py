@@ -42,24 +42,15 @@ from ._base_connection import _TYPE_BODY
 from ._base_connection import ProxyConfig as ProxyConfig
 from ._base_connection import _ResponseOptions as _ResponseOptions
 from ._version import __version__
-from .exceptions import (
-    ConnectTimeoutError,
-    HeaderParsingError,
-    NameResolutionError,
-    NewConnectionError,
-    ProxyError,
-    SystemTimeWarning,
-)
+from .exceptions import (ConnectTimeoutError, HeaderParsingError,
+                         NameResolutionError, NewConnectionError, ProxyError,
+                         SystemTimeWarning)
 from .util import SKIP_HEADER, SKIPPABLE_HEADERS, connection, ssl_
 from .util.request import body_to_chunks
 from .util.ssl_ import assert_fingerprint as _assert_fingerprint
-from .util.ssl_ import (
-    create_urllib3_context,
-    is_ipaddress,
-    resolve_cert_reqs,
-    resolve_ssl_version,
-    ssl_wrap_socket,
-)
+from .util.ssl_ import (create_urllib3_context, is_ipaddress,
+                        resolve_cert_reqs, resolve_ssl_version,
+                        ssl_wrap_socket)
 from .util.ssl_match_hostname import CertificateError, match_hostname
 from .util.url import Url
 

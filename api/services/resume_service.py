@@ -1,5 +1,6 @@
 import logging
-from typing import List, Dict
+from typing import Dict, List
+
 from clients.ollama_client import OllamaClient
 from config import Settings
 

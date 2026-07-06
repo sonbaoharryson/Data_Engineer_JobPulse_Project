@@ -1,5 +1,6 @@
-from airflow.decorators import dag, task
 from datetime import datetime
+
+from airflow.decorators import dag, task
 
 PROJECT_DIR = "/opt/airflow/dbt/job_warehouse"
 PROFILE_DIR = "/opt/airflow/dbt/job_warehouse"

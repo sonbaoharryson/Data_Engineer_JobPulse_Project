@@ -1,7 +1,8 @@
-import requests
 import logging
-from typing import List, Optional, Literal
 from pathlib import Path
+from typing import List, Literal, Optional
+
+import requests
 from config import Settings
 
 IntentType = Literal["job_search", "resume_review", "general_chat"]

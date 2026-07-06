@@ -15,7 +15,8 @@ from . import exceptions
 from ._base_connection import _TYPE_BODY
 from ._collections import HTTPHeaderDict
 from ._version import __version__
-from .connectionpool import HTTPConnectionPool, HTTPSConnectionPool, connection_from_url
+from .connectionpool import (HTTPConnectionPool, HTTPSConnectionPool,
+                             connection_from_url)
 from .filepost import _TYPE_FIELDS, encode_multipart_formdata
 from .poolmanager import PoolManager, ProxyManager, proxy_from_url
 from .response import BaseHTTPResponse, HTTPResponse
