@@ -1,8 +1,12 @@
 import logging
 
 from airflow.decorators import task, task_group
-from tasks.audit_tasks import (dbt_task_callback, discord_task_callback,
-                               task_failure_callback, task_success_callback)
+from tasks.audit_tasks import (
+    dbt_task_callback,
+    discord_task_callback,
+    task_failure_callback,
+    task_success_callback,
+)
 from tasks.process_tasks import *
 
 logger = logging.getLogger(__name__)

@@ -5,11 +5,20 @@ from clients.mongodb_client import MongoDBClientWrapper
 from config import Settings
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-from schemas import (ChatHistory, ChatRequest, ChatResponse,
-                     RecommendJobsRequest, RecommendJobsResponse,
-                     ResumeReviewRequest, ResumeReviewResponse,
-                     UploadResumeRequest, UploadResumeResponse, UserProfile,
-                     UserProfileResponse, UserProfileUpdate)
+from schemas import (
+    ChatHistory,
+    ChatRequest,
+    ChatResponse,
+    RecommendJobsRequest,
+    RecommendJobsResponse,
+    ResumeReviewRequest,
+    ResumeReviewResponse,
+    UploadResumeRequest,
+    UploadResumeResponse,
+    UserProfile,
+    UserProfileResponse,
+    UserProfileUpdate,
+)
 from services.chat_service import ChatService
 from services.memory_service import MemoryService
 from services.recommendation_service import RecommendationService
